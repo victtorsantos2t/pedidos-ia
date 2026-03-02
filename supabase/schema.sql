@@ -64,7 +64,20 @@ ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 -- Políticas de Segurança (Regras do Jogo)
 -- Perfis
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+
+-- CORREÇÃO DE SEGURANÇA CRÍTICA: Os usuários não podem atualizar seu próprio status de is_admin
+CREATE POLICY "Users can update own profile (except is_admin)" ON profiles 
+  FOR UPDATE 
+  USING (auth.uid() = id) 
+  WITH CHECK (
+    -- Permite o update mas REJEITA se houver a tentativa de definir is_admin = true por ele mesmo!
+    auth.uid() = id 
+  );
+
+-- Revoga a capacidade de todos (anônimos/logados) mudarem colunas específicas
+-- Só o Supabase Server pode definir isAdmin direto via service_role key
+REVOKE UPDATE (is_admin) ON profiles FROM authenticated;
+REVOKE UPDATE (is_admin) ON profiles FROM anon;
 
 -- Cardápio (Público se ativo)
 CREATE POLICY "Categories are publically viewable" ON categories FOR SELECT USING (is_active = true);
@@ -96,8 +109,12 @@ CREATE POLICY "Admins bypass RLS on products" ON products FOR ALL USING (
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, phone)
-  VALUES (new.id, new.phone);
+  INSERT INTO public.profiles (id, name, phone)
+  VALUES (
+    new.id, 
+    new.raw_user_meta_data->>'name',
+    new.raw_user_meta_data->>'phone'
+  );
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

@@ -16,8 +16,7 @@ export async function login(formData: FormData) {
     if (error) {
         return { error: error.message };
     }
-
-    revalidatePath("/checkout");
+    revalidatePath("/", "layout");
     return { success: true };
 }
 
@@ -28,7 +27,7 @@ export async function signup(formData: FormData) {
     const name = formData.get("name") as string;
     const phone = formData.get("phone") as string;
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -43,7 +42,22 @@ export async function signup(formData: FormData) {
         return { error: error.message };
     }
 
-    revalidatePath("/checkout");
+    // UPDATE FORÇADO: Garante que o nome e telefone sejam salvos no perfil
+    // independentemente da trigger do Supabase online estar configurada corretamente.
+    if (data?.user) {
+        const { error: profileError } = await supabase
+            .from("profiles")
+            .update({
+                name,
+                phone,
+            })
+            .eq("id", data.user.id);
+
+        if (profileError) {
+            console.error("Erro ao salvar dados do perfil no cadastro:", profileError);
+        }
+    }
+    revalidatePath("/", "layout");
     return { success: true };
 }
 

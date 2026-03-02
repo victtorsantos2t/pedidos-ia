@@ -12,14 +12,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         return (
             <div className={cn("relative flex items-center w-full group", containerClassName)}>
                 {leftIcon && (
-                    <div className="absolute left-4 text-gray-400 group-focus-within:text-brand transition-colors duration-200">
+                    <div className="absolute left-4 text-gray-500 dark:text-gray-400 group-focus-within:text-foreground transition-colors duration-200">
                         {leftIcon}
                     </div>
                 )}
                 <input
                     type={type}
                     className={cn(
-                        "flex h-14 w-full rounded-xl border-none bg-gray-50 dark:bg-gray-900/50 px-4 py-3 text-sm font-bold shadow-sm ring-offset-background transition-all placeholder:text-gray-400 placeholder:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/10 disabled:cursor-not-allowed disabled:opacity-50",
+                        "flex h-14 w-full rounded-xl border-none bg-gray-50 dark:bg-gray-900/50 px-4 py-3 text-sm font-bold shadow-sm ring-offset-background transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 placeholder:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-700 disabled:cursor-not-allowed disabled:opacity-50",
                         leftIcon && "pl-12",
                         rightIcon && "pr-12",
                         className
@@ -28,7 +28,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     {...props}
                 />
                 {rightIcon && (
-                    <div className="absolute right-4 text-gray-400 group-focus-within:text-brand transition-colors duration-200">
+                    <div className="absolute right-4 text-gray-500 dark:text-gray-400 group-focus-within:text-foreground transition-colors duration-200">
                         {rightIcon}
                     </div>
                 )}
@@ -43,7 +43,7 @@ const Label = React.forwardRef<HTMLLabelElement, React.LabelHTMLAttributes<HTMLL
         <label
             ref={ref}
             className={cn(
-                "text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 ml-1 block",
+                "text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 mb-1.5 ml-1 block",
                 className
             )}
             {...props}

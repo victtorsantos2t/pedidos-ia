@@ -25,7 +25,7 @@ export function BottomNav() {
         { icon: User, label: "Perfil", href: "/profile" },
     ];
 
-    if (pathname.startsWith("/admin")) return null;
+    if (pathname.startsWith("/admin") || pathname.startsWith("/checkout")) return null;
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom,0px)]">

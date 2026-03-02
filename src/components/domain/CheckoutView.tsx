@@ -78,7 +78,14 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
         if ((res as any).error) {
             setError((res as any).error);
         } else {
-            router.push("/");
+            // Roteamento Inteligente:
+            // Se o carrinho estiver vazio, muito provavelmente o usuário clicou no menu "Perfil"
+            if (items.length === 0) {
+                router.push("/profile");
+            } else {
+                // Caso contrário (fazendo pedido), mantém na mesma tela
+                window.location.reload();
+            }
         }
         setLoading(false);
     };
@@ -92,7 +99,11 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
         if ((res as any).error) {
             setError((res as any).error);
         } else {
-            router.push("/");
+            if (items.length === 0) {
+                router.push("/profile");
+            } else {
+                window.location.reload();
+            }
         }
         setLoading(false);
     };
@@ -134,97 +145,145 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
 
     // -------- AUTH FORM --------
     const renderAuthForm = () => (
-        <div className="mx-auto w-full max-w-md pt-10 px-4">
-            <button onClick={() => router.back()} className="mb-6 flex items-center text-gray-500">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-            </button>
+        <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-black w-full pb-10">
+            {/* Header / Nav */}
+            <header className="sticky top-0 z-40 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-100 dark:border-white/5 px-4 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-4 flex items-center justify-between shadow-sm">
+                <button
+                    onClick={() => router.back()}
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100/80 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors active:scale-95"
+                >
+                    <ArrowLeft className="h-5 w-5 text-foreground" />
+                </button>
+                <div className="text-xs font-black uppercase tracking-widest text-[#9E9E9E]">
+                    Acesso Seguro
+                </div>
+                <div className="w-10" /> {/* spacer */}
+            </header>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-2xl">
-                        {authMode === "LOGIN" ? "Bem-vindo de volta" : "Crie sua conta"}
-                    </CardTitle>
-                    <p className="text-sm text-gray-500">
+            <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                className="mx-auto w-full max-w-md px-5 pt-8"
+            >
+                <div className="mb-8">
+                    <h1 className="text-[28px] font-black tracking-tight text-foreground leading-tight mb-2">
+                        {authMode === "LOGIN" ? "Que bom te ver\npor aqui!" : "Crie sua conta"}
+                    </h1>
+                    <p className="text-[14px] text-gray-700 dark:text-gray-300 font-medium">
                         {authMode === "LOGIN"
-                            ? "Identifique-se para continuar seu pedido."
-                            : "Rápido e fácil para acompanhar pedidos."}
+                            ? "Entre para confirmar o seu pedido rapidinho."
+                            : "Preencha seus dados para acompanhar seus pedidos."}
                     </p>
-                </CardHeader>
-                <CardContent>
+                </div>
+
+                <div className="bg-white dark:bg-[#111] p-6 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-white/5">
                     <form
                         key={authMode}
                         onSubmit={authMode === "LOGIN" ? handleLogin : handleSignup}
-                        className="space-y-4"
+                        className="space-y-5"
                         autoComplete="off"
                     >
-                        {authMode === "SIGNUP" && (
-                            <>
-                                <div className="space-y-1">
-                                    <Label htmlFor="name">Nome completo</Label>
-                                    <Input
-                                        id="name"
-                                        name="name"
-                                        required
-                                        placeholder="João Silva"
-                                        leftIcon={<User className="h-5 w-5" />}
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="phone">Telefone / WhatsApp</Label>
-                                    <Input
-                                        id="phone"
-                                        name="phone"
-                                        type="tel"
-                                        required
-                                        placeholder="(11) 99999-9999"
-                                        leftIcon={<Smartphone className="h-5 w-5" />}
-                                    />
-                                </div>
-                            </>
-                        )}
+                        <AnimatePresence mode="popLayout">
+                            {authMode === "SIGNUP" && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="space-y-5"
+                                >
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="name">Nome completo</Label>
+                                        <Input
+                                            id="name"
+                                            name="name"
+                                            required
+                                            placeholder="João Silva"
+                                            leftIcon={<User className="h-5 w-5" />}
+                                            className="bg-gray-50 dark:bg-white/5 border border-transparent focus:border-brand/20 transition-all font-medium text-base shadow-none"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="phone">Celular (com DDD)</Label>
+                                        <Input
+                                            id="phone"
+                                            name="phone"
+                                            type="tel"
+                                            required
+                                            placeholder="(11) 90000-0000"
+                                            leftIcon={<Smartphone className="h-5 w-5" />}
+                                            className="bg-gray-50 dark:bg-white/5 border border-transparent focus:border-brand/20 transition-all font-medium text-base shadow-none"
+                                        />
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                        <div className="space-y-1">
+                        <div className="space-y-1.5 focus-within:relative z-10">
                             <Label htmlFor="email">E-mail</Label>
                             <Input
                                 id="email"
                                 name="email"
                                 type="email"
                                 required
-                                placeholder="seu@email.com.br"
+                                placeholder="exemplo@email.com"
                                 leftIcon={<Mail className="h-5 w-5" />}
+                                className="bg-gray-50 dark:bg-white/5 border border-transparent focus:border-brand/20 transition-all font-medium text-base shadow-none"
                             />
                         </div>
 
-                        <div className="space-y-1">
+                        <div className="space-y-1.5 focus-within:relative z-10">
                             <Label htmlFor="password">Senha</Label>
                             <Input
                                 id="password"
                                 name="password"
                                 type="password"
                                 required
+                                placeholder="••••••••"
                                 leftIcon={<Lock className="h-5 w-5" />}
                                 autoComplete={authMode === "SIGNUP" ? "new-password" : "current-password"}
+                                className="bg-gray-50 dark:bg-white/5 border border-transparent focus:border-brand/20 transition-all font-medium text-base shadow-none"
                             />
                         </div>
 
-                        {error && <p className="text-sm text-red-500">{error}</p>}
+                        {error && (
+                            <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="pt-1">
+                                <p className="text-xs font-bold text-red-500 bg-red-50 dark:bg-red-500/10 p-3 rounded-xl border border-red-100 dark:border-red-500/20 flex items-center gap-2">
+                                    <AlertTriangle className="h-4 w-4" />
+                                    {error}
+                                </p>
+                            </motion.div>
+                        )}
 
-                        <Button type="submit" className="w-full" disabled={loading}>
-                            {loading ? "Aguarde..." : (authMode === "LOGIN" ? "Entrar" : "Criar Conta")}
-                        </Button>
+                        <div className="pt-2">
+                            <Button
+                                type="submit"
+                                className="w-full h-14 rounded-2xl text-[15px] font-bold shadow-xl shadow-brand/20 active:scale-[0.98] transition-all"
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <span className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" /> Processando...</span>
+                                ) : (
+                                    authMode === "LOGIN" ? "Continuar" : "Criar Conta"
+                                )}
+                            </Button>
+                        </div>
 
-                        <div className="text-center mt-4">
+                        <div className="text-center pt-3 border-t border-gray-100 dark:border-white/5 mt-6">
                             <button
                                 type="button"
                                 onClick={() => setAuthMode(authMode === "LOGIN" ? "SIGNUP" : "LOGIN")}
-                                className="text-sm text-brand underline"
+                                className="text-sm font-bold text-gray-700 dark:text-gray-300 hover:text-foreground transition-colors p-2"
                             >
-                                {authMode === "LOGIN" ? "Não tem conta? Cadastre-se" : "Já possui conta? Faça login"}
+                                {authMode === "LOGIN" ? "Ainda não tem conta? " : "Já possui conta? "}
+                                <span className="text-foreground underline decoration-gray-400 dark:decoration-gray-600 underline-offset-4 font-black">
+                                    {authMode === "LOGIN" ? "Cadastre-se" : "Faça login"}
+                                </span>
                             </button>
                         </div>
                     </form>
-                </CardContent>
-            </Card>
+                </div>
+            </motion.div>
         </div>
     );
 
