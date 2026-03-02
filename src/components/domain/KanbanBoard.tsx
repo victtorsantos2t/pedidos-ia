@@ -53,7 +53,6 @@ const STATUS_FLOW: Record<OrderStatus, OrderStatus | null> = {
 
 export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: Order[], storeSettings: any }) {
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [soundEnabled, setSoundEnabled] = useState(true); // Radar ativo por padrão
 
     // Estados do Modal de Cancelamento
     const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
@@ -129,31 +128,6 @@ export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: O
 
     return (
         <div className="flex h-full lg:overflow-x-auto xl:overflow-x-hidden p-6 gap-6 bg-gray-50/50 dark:bg-background relative no-scrollbar">
-            {/* Botão Radar de Som */}
-            <div className="fixed bottom-8 right-5 z-50 flex flex-col items-end gap-2">
-                {soundEnabled && (
-                    <span className="bg-green-500 text-white text-[10px] px-3 py-1.5 rounded-full font-black uppercase tracking-widest shadow-lg shadow-green-500/30 whitespace-nowrap">
-                        🔔 Radar Ativo
-                    </span>
-                )}
-                <Button
-                    variant="default"
-                    className={cn(
-                        "rounded-full h-14 w-14 shadow-2xl flex items-center justify-center transition-all duration-300",
-                        soundEnabled
-                            ? "bg-green-500 hover:bg-green-600 text-white shadow-green-500/40"
-                            : "bg-gray-200 hover:bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
-                    )}
-                    onClick={() => {
-                        const isEnabling = !soundEnabled;
-                        setSoundEnabled(isEnabling);
-                        if (isEnabling) unlockAudio();
-                    }}
-                    title={soundEnabled ? "Desativar alerta sonoro" : "Ativar alerta sonoro"}
-                >
-                    {soundEnabled ? <Bell className="w-6 h-6" /> : <BellOff className="w-6 h-6" />}
-                </Button>
-            </div>
 
             {COLUMNS.map((col) => (
                 <div key={col.id} className="flex min-w-[320px] max-w-[350px] flex-col rounded-xl bg-gray-100/50 p-4 dark:bg-gray-900/50">
