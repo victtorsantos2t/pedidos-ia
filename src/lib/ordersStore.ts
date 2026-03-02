@@ -181,7 +181,9 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
                         playBeep();
 
                         // Busca pormenorizado do pedido com os itens (pois payload.new vem raso)
-                        (async () => {
+                        // DELAY DE TRANSAÇÃO (1 segundo): A internet envia o Order milisegundos antes do Order_Items,
+                        // gerando uma Race Condition. Isso faz aguardar a tabela inteira selar antes de desenhar.
+                        setTimeout(async () => {
                             const { data } = await supabase.from('orders').select(`
                                 *,
                                 order_items (
@@ -195,9 +197,16 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
                                 if (!st.orders.some(o => o.id === data.id)) {
                                     set({ orders: [data as Order, ...st.orders] });
                                     st.refreshDelays();
+                                } else {
+                                    // Fallback: se o polling já pegou sem itens, a gente atualiza repondo os itens.
+                                    set((state) => ({
+                                        orders: state.orders.map((o) =>
+                                            o.id === data.id ? { ...o, order_items: data.order_items } : o
+                                        )
+                                    }));
                                 }
                             }
-                        })();
+                        }, 1500);
                     } else if (eventType === "UPDATE") {
                         if (next.status === "COMPLETED" || next.status === "CANCELLED") {
                             set({ orders: orders.filter((o) => o.id !== next.id) });
