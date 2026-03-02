@@ -6,7 +6,7 @@ import { updateOrderStatus } from "@/lib/actions/adminActions";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/core/Card";
 import { Button } from "@/components/core/Button";
-import { Clock, MapPin, Phone, ArrowRight, Navigation, XCircle, AlertTriangle, ChevronRight, AlertCircle, ChefHat } from "lucide-react";
+import { Clock, ArrowRight, XCircle, AlertCircle, AlertTriangle, ChefHat, Bell, BellOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOrdersStore } from "@/lib/ordersStore";
 import { parseEstimatedTime } from "@/lib/storeUtils";
@@ -53,7 +53,7 @@ const STATUS_FLOW: Record<OrderStatus, OrderStatus | null> = {
 
 export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: Order[], storeSettings: any }) {
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [soundEnabled, setSoundEnabled] = useState(false);
+    const [soundEnabled, setSoundEnabled] = useState(true); // Radar ativo por padrão
 
     // Estados do Modal de Cancelamento
     const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
@@ -129,19 +129,30 @@ export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: O
 
     return (
         <div className="flex h-full lg:overflow-x-auto xl:overflow-x-hidden p-6 gap-6 bg-gray-50/50 dark:bg-background relative no-scrollbar">
-            <div className="fixed bottom-10 right-10 z-50">
+            {/* Botão Radar de Som */}
+            <div className="fixed bottom-8 right-5 z-50 flex flex-col items-end gap-2">
+                {soundEnabled && (
+                    <span className="bg-green-500 text-white text-[10px] px-3 py-1.5 rounded-full font-black uppercase tracking-widest shadow-lg shadow-green-500/30 whitespace-nowrap">
+                        🔔 Radar Ativo
+                    </span>
+                )}
                 <Button
-                    variant={soundEnabled ? "default" : "outline"}
-                    className={cn("rounded-full h-14 w-14 shadow-2xl flex items-center justify-center transition-all", soundEnabled ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-white dark:bg-gray-800')}
+                    variant="default"
+                    className={cn(
+                        "rounded-full h-14 w-14 shadow-2xl flex items-center justify-center transition-all duration-300",
+                        soundEnabled
+                            ? "bg-green-500 hover:bg-green-600 text-white shadow-green-500/40"
+                            : "bg-gray-200 hover:bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                    )}
                     onClick={() => {
                         const isEnabling = !soundEnabled;
                         setSoundEnabled(isEnabling);
                         if (isEnabling) unlockAudio();
                     }}
+                    title={soundEnabled ? "Desativar alerta sonoro" : "Ativar alerta sonoro"}
                 >
-                    {soundEnabled ? <Clock className="w-6 h-6 animate-pulse" /> : <ArrowRight className="w-6 h-6 rotate-90" />}
+                    {soundEnabled ? <Bell className="w-6 h-6" /> : <BellOff className="w-6 h-6" />}
                 </Button>
-                {soundEnabled && <span className="absolute -top-12 right-0 bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-full font-bold whitespace-nowrap shadow-sm border border-green-200">SISTEMA RADAR ATIVO ðŸ””</span>}
             </div>
 
             {COLUMNS.map((col) => (
@@ -197,13 +208,36 @@ export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: O
                                                 </div>
                                             </CardHeader>
                                             <CardContent className="p-4 pt-3">
-                                                <div className="space-y-4">
-                                                    {/* Fake label just for visual match (could be items here normally) */}
-                                                    <div className="h-4 w-full bg-white/60 dark:bg-black/20 rounded-full mb-4 mt-1" />
+                                                <div className="space-y-2">
+                                                    {/* Itens reais do pedido */}
+                                                    {order.order_items && order.order_items.length > 0 && (
+                                                        <ul className="space-y-1">
+                                                            {order.order_items.map((item: any) => (
+                                                                <li key={item.id} className="flex items-start gap-1.5">
+                                                                    <span className="text-[11px] font-black text-[#FA0000] shrink-0">{item.quantity}x</span>
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-[11px] font-bold text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">{item.name || item.product?.name}</span>
+                                                                        {item.notes && (
+                                                                            <span className="text-[9px] italic text-[#FA0000] font-bold">Obs: {item.notes}</span>
+                                                                        )}
+                                                                    </div>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    )}
 
-                                                    <div className="flex flex-col gap-1.5 text-[9px] font-black text-gray-400 uppercase tracking-widest italic opacity-60">
-                                                        <div className="flex items-center gap-2 truncate line-clamp-1">{order.delivery_address}</div>
-                                                        <div className="flex items-center gap-2"><Clock className={cn("h-3 w-3", isDelayed ? "text-[#FA0000]" : "")} /> <span className={cn(isDelayed && "text-[#FA0000] font-black")}>{new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}  {isDelayed && `(Atraso: ${elapsedMin}min)`}</span></div>
+                                                    {/* Endereço e Horário */}
+                                                    <div className="flex flex-col gap-1 pt-1 border-t border-gray-100 dark:border-gray-800 mt-2">
+                                                        {order.delivery_address && (
+                                                            <p className="text-[9px] text-gray-400 font-bold truncate">{order.delivery_address}</p>
+                                                        )}
+                                                        <div className="flex items-center gap-1">
+                                                            <Clock className={cn("h-3 w-3", isDelayed ? "text-[#FA0000]" : "text-gray-400")} />
+                                                            <span className={cn("text-[9px] font-black", isDelayed ? "text-[#FA0000]" : "text-gray-400")}>
+                                                                {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                {isDelayed && ` • Atraso: ${elapsedMin}min`}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </CardContent>

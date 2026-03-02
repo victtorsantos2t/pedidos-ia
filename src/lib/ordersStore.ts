@@ -34,7 +34,75 @@ interface OrdersStore {
 }
 
 let channel: any = null;
-let notificationAudio: HTMLAudioElement | null = null;
+let audioContext: AudioContext | null = null;
+let audioUnlocked = false;
+
+// Melodia de notificação — 5 notas ascendentes com sustain
+function playBeep() {
+    if (!audioContext || !audioUnlocked) return;
+
+    const notes = [
+        { freq: 523, dur: 0.15 }, // C5
+        { freq: 659, dur: 0.15 }, // E5
+        { freq: 784, dur: 0.15 }, // G5
+        { freq: 659, dur: 0.12 }, // E5
+        { freq: 1047, dur: 0.35 }, // C6 — nota longa final
+    ];
+
+    let t = audioContext.currentTime + 0.05;
+
+    notes.forEach(({ freq, dur }) => {
+        const osc = audioContext!.createOscillator();
+        const gain = audioContext!.createGain();
+        osc.connect(gain);
+        gain.connect(audioContext!.destination);
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, t);
+
+        // Envelope: attack rápido + decay suave
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.55, t + 0.04);
+        gain.gain.setValueAtTime(0.55, t + dur - 0.05);
+        gain.gain.linearRampToValueAtTime(0, t + dur);
+
+        osc.start(t);
+        osc.stop(t + dur);
+        t += dur + 0.04; // pausa entre notas
+    });
+}
+
+// Desbloqueia o contexto no primeiro gesto do usuário em qualquer lugar
+function setupAutoUnlock() {
+    if (typeof window === "undefined") return;
+    const unlock = () => {
+        if (audioUnlocked) return;
+        try {
+            audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+            // Oscillator mudo só para acordar o contexto
+            const o = audioContext.createOscillator();
+            const g = audioContext.createGain();
+            o.connect(g); g.connect(audioContext.destination);
+            g.gain.setValueAtTime(0.001, audioContext.currentTime);
+            o.start(); o.stop(audioContext.currentTime + 0.05);
+            audioUnlocked = true;
+            console.log("[Audio] Desbloqueado automaticamente!");
+        } catch (e) {
+            console.warn("[Audio] Auto-unlock falhou:", e);
+        }
+        window.removeEventListener("click", unlock);
+        window.removeEventListener("touchstart", unlock);
+        window.removeEventListener("keydown", unlock);
+    };
+    window.addEventListener("click", unlock);
+    window.addEventListener("touchstart", unlock);
+    window.addEventListener("keydown", unlock);
+}
+
+// Inicia o listener assim que o módulo carrega no cliente
+if (typeof window !== "undefined") {
+    setupAutoUnlock();
+}
 
 export const useOrdersStore = create<OrdersStore>((set, get) => ({
     orders: [],
@@ -43,16 +111,20 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
     lastRefresh: Date.now(),
 
     unlockAudio: () => {
-        if (typeof window !== "undefined" && !notificationAudio) {
+        if (typeof window !== "undefined" && !audioUnlocked) {
             try {
-                notificationAudio = new Audio("/notify.mp3");
-                notificationAudio.volume = 1;
-                notificationAudio.play().then(() => {
-                    notificationAudio!.pause();
-                    notificationAudio!.currentTime = 0;
-                }).catch(e => console.log("Unlock bloqueado:", e));
+                audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                gain.gain.setValueAtTime(0.001, audioContext.currentTime);
+                osc.start();
+                osc.stop(audioContext.currentTime + 0.1);
+                audioUnlocked = true;
+                console.log("[Audio] Web Audio API desbloqueada com sucesso!");
             } catch (e) {
-                console.error("Audio unlock fallback error", e);
+                console.error("[Audio] Falha ao desbloquear Web Audio API:", e);
             }
         }
     },
@@ -105,11 +177,8 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
                     const { orders } = get();
 
                     if (eventType === "INSERT") {
-                        // Toca o alarme global
-                        if (notificationAudio) {
-                            notificationAudio.currentTime = 0;
-                            notificationAudio.play().catch(e => console.log("Audio block:", e));
-                        }
+                        // Toca o bipe via Web Audio API
+                        playBeep();
 
                         // Busca pormenorizado do pedido com os itens (pois payload.new vem raso)
                         (async () => {

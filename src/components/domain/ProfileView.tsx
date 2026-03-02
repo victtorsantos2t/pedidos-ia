@@ -21,7 +21,7 @@ export function ProfileView({ user }: ProfileViewProps) {
         { label: "Endereços cadastrados", icon: MapPin, href: "/profile/addresses" },
         { label: "Minha carteira", icon: Wallet, href: "/profile/wallet" },
         { label: "Minhas avaliações", icon: Star, href: "/profile/ratings" },
-        { label: "Pedidos", icon: ShoppingBag, href: "/my-orders" },
+        { label: "Pedidos", icon: ShoppingBag, href: "/profile/orders" },
     ];
 
     const handleLogout = async () => {

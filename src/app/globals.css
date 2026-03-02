@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  /* ─── Colors ──────────────────────────────────── */
   --background: #F9FAFB;
   --foreground: #0D1217;
   --text-secondary: #697079;
@@ -23,12 +24,52 @@
   --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* Brand */
+  /* ─── Brand ─────────────────────────────────────── */
   --brand-primary: #FA0000;
+  /* Vermelho principal do sistema */
   --spacing-page: 20px;
 
-  /* Shadows */
+  /* ─── Shadows ───────────────────────────────────── */
   --shadow-premium: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+
+  /* ─── Text Color System (iFood-style) ───────────── */
+  /* Nunca usar #000 puro — vibra em OLED. Use #1F1F1F */
+  --text-primary: #1F1F1F;
+  /* Títulos, nomes, preços  */
+  --text-secondary: #6B6B6B;
+  /* Descrições, subtítulos  */
+  --text-tertiary: #9E9E9E;
+  /* Infos auxiliares, meta  */
+  --text-inverse: #FFFFFF;
+  /* Texto sobre fundos escuros/botões */
+
+  /* ─── Typography System (iFood-style) ─────────── */
+
+  /* Font Family Stack — System UI first para PWA nativo */
+  --font-family-system: system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+
+  /* Font Sizes */
+  --fs-display: 20px;
+  /* Nome restaurante / Hero title */
+  --fs-title: 16px;
+  /* Produto / seção principal     */
+  --fs-body: 14px;
+  /* Descrição / conteúdo          */
+  --fs-label: 12px;
+  /* Infos secundárias / chips     */
+
+  /* Font Weights */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Line Heights */
+  --lh-display: 26px;
+  --lh-normal: 24px;
+  --lh-body: 20px;
+  --lh-label: 16px;
 }
 
 @theme inline {
@@ -43,11 +84,18 @@
   --color-gray-200: var(--neutral-200);
   --color-gray-100: var(--neutral-100);
 
+  /* Text Colors (Tailwind tokens) */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-inverse: var(--text-inverse);
+
   /* Brand Primary */
   --color-brand: var(--brand-primary);
   --color-brand-hover: #E60000;
 
-  --font-sans: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  /* Font — mantém Sora como voz do design premium */
+  --font-sans: var(--font-sora), var(--font-family-system);
 
   --radius-xl: 12px;
   --radius-2xl: 12px;
@@ -98,21 +146,56 @@
   }
 }
 
+/* ─── Dark Mode ──────────────────────────────────── */
 :root.dark {
   --background: #0D1217;
   --foreground: #F9FAFB;
   --surface: #1F2A37;
+
+  /* Text colors dark */
+  --text-primary: #FFFFFF;
+  --text-secondary: #B3B3B3;
+  --text-tertiary: #7A7A7A;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: #121212;
+    --foreground: #FFFFFF;
+    --surface: #1E1E1E;
+
+    /* Text colors dark mode automático */
+    --text-primary: #FFFFFF;
+    --text-secondary: #B3B3B3;
+    --text-tertiary: #7A7A7A;
+  }
+}
+
+/* ─── Base Styles ──────────────────────────────────── */
+html {
+  /* Escala responsiva mobile — base estável */
+  font-size: clamp(15px, 1.8vw, 17px);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+
+  /* ✅ PWA: renderização nítida de fonte (antialiasing premium) */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  /* ✅ PWA: scroll nativo sem bounce indesejado */
+  overscroll-behavior-y: contain;
 }
 
 @layer base {
   body {
     @apply font-sans;
-    font-weight: 400;
+    font-weight: var(--fw-regular);
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
   }
 
   /* Limita o peso máximo da fonte em toda a aplicação */
@@ -126,7 +209,124 @@ body {
 
   * {
     @apply border-gray-200 dark:border-gray-800;
+
+    /* ✅ PWA: remove o highlight azul/cinza do android ao clicar */
+    -webkit-tap-highlight-color: transparent;
   }
+
+  /* ✅ PWA: tap targets mínimos (regra iFood — 48px) */
+  button,
+  a,
+  [role="button"] {
+    min-height: 48px;
+  }
+
+  /* Imagens sem layout shift */
+  img {
+    aspect-ratio: auto;
+  }
+}
+
+/* ─── Typography Utility Classes ─────────────────── */
+
+/* Display — Nome restaurante / Hero */
+.text-display {
+  font-size: var(--fs-display);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-display);
+}
+
+/* Title — Produto / Seção */
+.text-title {
+  font-size: var(--fs-title);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-normal);
+}
+
+/* Price — Preço (SEMPRE bold — regra conversão) */
+.text-price {
+  font-size: var(--fs-title);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-normal);
+}
+
+/* Body — Descrição */
+.text-body-content {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-body);
+  color: #6b6b6b;
+}
+
+/* Label — Infos secundárias */
+.text-label-sm {
+  font-size: var(--fs-label);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-label);
+}
+
+/* Button — CTA */
+.text-button {
+  font-size: var(--fs-title);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-body);
+}
+
+/* ─── Semantic Color Utilities ───────────────────── */
+
+/* Hierarquia de leitura: primary → entender → ignorável */
+.text-color-primary {
+  color: var(--text-primary);
+}
+
+.text-color-secondary {
+  color: var(--text-secondary);
+}
+
+.text-color-tertiary {
+  color: var(--text-tertiary);
+}
+
+.text-color-inverse {
+  color: var(--text-inverse);
+}
+
+.text-color-brand {
+  color: var(--brand-primary);
+}
+
+/* ─── Interaction States (PWA efeito app) ─────────── */
+
+/* Press feedback nativo */
+.pressable:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+  transition: opacity 80ms ease, transform 80ms ease;
+}
+
+/* Item selecionado / ativo */
+.selected {
+  color: var(--brand-primary);
+}
+
+/* CTA Button semantic */
+.btn-cta {
+  background: var(--brand-primary);
+  color: var(--text-inverse);
+  font-size: var(--fs-title);
+  font-weight: var(--fw-semibold);
+  min-height: 48px;
+}
+
+/* ─── PWA Utilities ──────────────────────────────── */
+
+/* Safe Area — iPhone notch bottom */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top);
 }
 
 /* Esconde scrollbar mas mantém scroll funcional */

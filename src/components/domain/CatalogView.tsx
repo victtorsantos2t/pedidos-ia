@@ -151,11 +151,11 @@ export function CatalogView({ categories, products, isStoreOpen = true, storeSet
                             )}
                         </motion.div>
 
-                        {/* Nome e Status */}
+                        {/* Nome da loja — text-display (20px/600) + text-primary */}
                         <div className="flex flex-col">
                             <h1 className={cn(
-                                "font-black tracking-tighter leading-none transition-all duration-300",
-                                scrolled ? "text-base" : "text-xl text-[#2A2A2A] dark:text-white"
+                                "font-black tracking-tighter leading-none transition-all duration-300 text-color-primary",
+                                scrolled ? "text-base" : "text-display"
                             )}>
                                 {storeSettings?.store_name || "SMASH GOURMET"}
                             </h1>
@@ -339,8 +339,10 @@ export function CatalogView({ categories, products, isStoreOpen = true, storeSet
                                 <TrendingUp className="h-5 w-5" />
                             </div>
                             <div>
-                                <h2 className="text-2xl font-black text-foreground uppercase italic tracking-tighter">Mais Pedidos</h2>
-                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">OS QUERIDINHOS DA CASA</p>
+                                {/* Mais Pedidos — text-display + text-primary */}
+                                <h2 className="text-display font-black text-color-primary uppercase italic tracking-tighter">Mais Pedidos</h2>
+                                {/* Subtítulo — text-label (12px) + text-tertiary */}
+                                <p className="text-label-sm text-color-tertiary font-bold uppercase tracking-widest mt-0.5">Os queridinhos da casa</p>
                             </div>
                         </div>
 
@@ -367,10 +369,12 @@ export function CatalogView({ categories, products, isStoreOpen = true, storeSet
                     return (
                         <div key={category.id} id={`section-${category.id}`} className="scroll-mt-28">
                             <div className="flex items-center justify-between mb-5">
-                                <h2 className="text-2xl font-bold text-foreground">
+                                {/* Título da categoria — text-display (20px/600) + text-primary */}
+                                <h2 className="text-display font-bold text-color-primary">
                                     {category.name}
                                 </h2>
-                                <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-500 px-3 py-1 rounded-full font-bold">
+                                {/* Contagem — text-label (12px) + text-tertiary */}
+                                <span className="text-label-sm text-color-tertiary bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full font-bold">
                                     {catProducts.length} itens
                                 </span>
                             </div>
@@ -399,8 +403,10 @@ export function CatalogView({ categories, products, isStoreOpen = true, storeSet
                         <div className="bg-gray-100 dark:bg-gray-800 p-5 rounded-full mb-4">
                             <Search className="h-10 w-10 text-gray-300" />
                         </div>
-                        <h3 className="text-lg font-bold text-foreground">Nada encontrado</h3>
-                        <p className="text-sm text-gray-500 max-w-xs mt-2">
+                        {/* Sem resultados — text-title + text-primary */}
+                        <h3 className="text-title font-bold text-color-primary">Nada encontrado</h3>
+                        {/* Descrição — text-body + text-secondary */}
+                        <p className="text-body-content max-w-xs mt-2">
                             Não encontramos nenhum item chamado "{searchQuery}". Tente outro nome ou navegue pelas categorias.
                         </p>
                     </div>

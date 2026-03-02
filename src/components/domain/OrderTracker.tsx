@@ -169,14 +169,7 @@ export function OrderTracker({ initialOrder, initialRating, storeConfig, ratingS
                             </button>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => setIsRatingActive(true)}
-                            className="h-10 w-10 rounded-xl bg-brand/5 flex items-center justify-center border border-brand/10 text-brand shadow-sm hover:scale-105 active:scale-95 transition-all"
-                        >
-                            <CurrentStageIcon className="h-5 w-5" />
-                        </button>
-                    </div>
+                    <div className="flex items-center gap-2" />
                 </header>
 
                 <div className="mx-auto max-w-md p-4">

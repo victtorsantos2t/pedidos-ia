@@ -48,10 +48,12 @@ export function ProductCard({ product, onAdd, isCompact = false, isStoreOpen = t
                 </div>
 
                 <div className="flex flex-col justify-between flex-1 gap-1">
-                    <h3 className="text-sm font-bold text-foreground line-clamp-2 leading-tight tracking-tight uppercase">
+                    {/* Nome do Produto — text-title (16px/500) */}
+                    <h3 className="text-title text-color-primary line-clamp-2 leading-tight tracking-tight uppercase">
                         {product.name}
                     </h3>
-                    <div className="font-black text-foreground text-base tracking-tighter">
+                    {/* Preço — SEMPRE bold + text-primary (regra iFood) */}
+                    <div className="text-price text-color-primary tracking-tighter">
                         {new Intl.NumberFormat("pt-BR", {
                             style: "currency",
                             currency: "BRL",
@@ -66,21 +68,24 @@ export function ProductCard({ product, onAdd, isCompact = false, isStoreOpen = t
         <motion.div
             whileTap={{ scale: 0.97 }}
             transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="flex cursor-pointer overflow-hidden rounded-xl bg-surface p-5 shadow-[var(--shadow-premium)] border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow"
+            className="flex cursor-pointer overflow-hidden rounded-xl bg-surface p-5 shadow-[var(--shadow-premium)] border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow pressable"
             onClick={() => onAdd(product)}
         >
             <div className="flex-1 pr-4 flex flex-col justify-between">
                 <div>
-                    <h3 className="text-base font-bold text-foreground line-clamp-2 leading-tight tracking-tight uppercase mb-2">
+                    {/* Nome — text-title (16px/500) + text-primary */}
+                    <h3 className="text-title text-color-primary line-clamp-2 leading-tight tracking-tight uppercase mb-2">
                         {product.name}
                     </h3>
                     {product.description && (
-                        <p className="mt-1 text-xs text-gray-400 font-medium line-clamp-1 tracking-tight">
+                        /* Descrição — text-body (14px/400) + text-secondary (#6B6B6B) */
+                        <p className="text-body-content line-clamp-2 tracking-tight mt-1">
                             {product.description}
                         </p>
                     )}
                 </div>
-                <div className="mt-3 font-black text-foreground text-base tracking-tighter">
+                {/* Preço — text-price (16px/700) + text-primary — NUNCA cinza */}
+                <div className="mt-3 text-price text-color-primary tracking-tighter">
                     {new Intl.NumberFormat("pt-BR", {
                         style: "currency",
                         currency: "BRL",
