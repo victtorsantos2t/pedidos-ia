@@ -1,0 +1,141 @@
+{
+  "categories": [
+    {
+      "id": "11111111-1111-1111-1111-111111111111",
+      "name": "Hambúrgueres Premium",
+      "sort_order": 1,
+      "is_active": true,
+      "created_at": "2026-02-28T14:33:25.723797+00:00"
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222222",
+      "name": "Bebidas Geladas",
+      "sort_order": 2,
+      "is_active": true,
+      "created_at": "2026-02-28T14:33:25.723797+00:00"
+    },
+    {
+      "id": "3ef25219-5794-408f-ad01-ff49fd7338b6",
+      "name": "Acompanhamentos",
+      "sort_order": 0,
+      "is_active": true,
+      "created_at": "2026-02-28T17:53:02.998213+00:00"
+    }
+  ],
+  "products": [
+    {
+      "id": "57f818ea-c5d8-4866-be93-c6d72eb86fbc",
+      "category_id": null,
+      "name": "Calabresa e Bacon",
+      "description": null,
+      "price": 45.99,
+      "image_url": null,
+      "is_available": true,
+      "created_at": "2026-02-28T14:28:16.156481+00:00"
+    },
+    {
+      "id": "0a3c36a8-07d1-4957-bb52-edfe560b5ef4",
+      "category_id": "11111111-1111-1111-1111-111111111111",
+      "name": "Classic Burger",
+      "description": "Blend 160g, queijo prato, alface, tomate e maionese da casa no pão brioche.",
+      "price": 32.9,
+      "image_url": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80",
+      "is_available": true,
+      "created_at": "2026-02-28T14:33:25.723797+00:00"
+    },
+    {
+      "id": "30574303-1502-412c-9681-12cda5dd923c",
+      "category_id": "11111111-1111-1111-1111-111111111111",
+      "name": "Double Cheddar Bacon",
+      "description": "Dois blends de 160g, muito cheddar derretido, farofa de bacon crocante e cebola caramelizada.",
+      "price": 45.9,
+      "image_url": "https://images.unsplash.com/photo-1594212202875-8eb6ea550423?auto=format&fit=crop&w=500&q=80",
+      "is_available": true,
+      "created_at": "2026-02-28T14:33:25.723797+00:00"
+    },
+    {
+      "id": "aad1446a-ede4-4207-ba70-5253e27b316b",
+      "category_id": "11111111-1111-1111-1111-111111111111",
+      "name": "Smash Chicken",
+      "description": "Sobrecoxa desossada e empanada super crocante, salada coleslaw e honey mustard.",
+      "price": 29.9,
+      "image_url": "https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?auto=format&fit=crop&w=500&q=80",
+      "is_available": true,
+      "created_at": "2026-02-28T14:33:25.723797+00:00"
+    },
+    {
+      "id": "5d6009ae-5003-4137-85ee-10e50e044071",
+      "category_id": "11111111-1111-1111-1111-111111111111",
+      "name": "Veggie Supreme",
+      "description": "Hambúrguer de grão de bico e cogumelos, queijo prato (opcional), rúcula e tomate seco.",
+      "price": 34.5,
+      "image_url": "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=500&q=80",
+      "is_available": true,
+      "created_at": "2026-02-28T14:33:25.723797+00:00"
+    },
+    {
+      "id": "d4e05761-d564-40ca-a623-720cfce7524b",
+      "category_id": "11111111-1111-1111-1111-111111111111",
+      "name": "Truffle Monster",
+      "description": "Blend 200g, queijo gruyère, maionese trufada e cogumelos salteados no pão australiano.",
+      "price": 52,
+      "image_url": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=500&q=80",
+      "is_available": true,
+      "created_at": "2026-02-28T14:33:25.723797+00:00"
+    },
+    {
+      "id": "6b121bce-452c-4aa2-a3be-6dd459513844",
+      "category_id": "22222222-2222-2222-2222-222222222222",
+      "name": "Coca-Cola Latinha 350ml",
+      "description": "Refrigerante Cola Lata.",
+      "price": 6.5,
+      "image_url": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=500&q=80",
+      "is_available": true,
+      "created_at": "2026-02-28T14:33:25.723797+00:00"
+    },
+    {
+      "id": "8b9d2523-e8b1-4ec2-9239-dd0087b41eaa",
+      "category_id": "22222222-2222-2222-2222-222222222222",
+      "name": "Guaraná Antarctica 350ml",
+      "description": "Refrigerante Guaraná Lata.",
+      "price": 6.5,
+      "image_url": "https://images.unsplash.com/photo-1626082895617-2c6b412bfebf?auto=format&fit=crop&w=500&q=80",
+      "is_available": true,
+      "created_at": "2026-02-28T14:33:25.723797+00:00"
+    },
+    {
+      "id": "270a1c7f-6c41-48de-8d95-ea7efa83e7ac",
+      "category_id": "22222222-2222-2222-2222-222222222222",
+      "name": "Suco Natural Laranja 500ml",
+      "description": "Suco de laranja natural feito na hora, sem açúcar e sem gelo.",
+      "price": 12,
+      "image_url": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=500&q=80",
+      "is_available": true,
+      "created_at": "2026-02-28T14:33:25.723797+00:00"
+    },
+    {
+      "id": "60d183b2-5ab9-4d44-93ea-fd49ad40a240",
+      "category_id": "22222222-2222-2222-2222-222222222222",
+      "name": "Milkshake de Ovomaltine",
+      "description": "Sorvete artesanal, muito ovomaltine e chantilly. 400ml.",
+      "price": 22.9,
+      "image_url": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80",
+      "is_available": true,
+      "created_at": "2026-02-28T14:33:25.723797+00:00"
+    },
+    {
+      "id": "648cfb38-f53c-4143-bbfb-6e59c328213d",
+      "category_id": "22222222-2222-2222-2222-222222222222",
+      "name": "Água com Gás com Limão",
+      "description": "Água mineral com gás 500ml e rodelas de limão taiti.",
+      "price": 5,
+      "image_url": "https://images.unsplash.com/photo-1559839914-11aae4f45bd3?auto=format&fit=crop&w=500&q=80",
+      "is_available": true,
+      "created_at": "2026-02-28T14:33:25.723797+00:00"
+    }
+  ],
+  "errors": {
+    "catError": null,
+    "prodError": null
+  }
+}

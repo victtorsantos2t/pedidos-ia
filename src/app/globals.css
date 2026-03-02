@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+:root {
+  --background: #F9FAFB;
+  --foreground: #0D1217;
+  --text-secondary: #697079;
+  --surface: #FFFFFF;
+
+  /* Neutral Scale */
+  --neutral-900: #0D1217;
+  --neutral-700: #1F2A37;
+  --neutral-500: #697079;
+  --neutral-400: #E3E3E3;
+  --neutral-200: #EEEEEE;
+  --neutral-100: #F3F4F6;
+
+  /* Motion Tokens */
+  --motion-fast: 120ms;
+  --motion-normal: 220ms;
+  --motion-slow: 320ms;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Brand */
+  --brand-primary: #FA0000;
+  --spacing-page: 20px;
+
+  /* Shadows */
+  --shadow-premium: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-text-secondary: var(--text-secondary);
+  --color-gray-900: var(--neutral-900);
+  --color-gray-700: var(--neutral-700);
+  --color-gray-500: var(--neutral-500);
+  --color-gray-400: var(--neutral-400);
+  --color-gray-200: var(--neutral-200);
+  --color-gray-100: var(--neutral-100);
+
+  /* Brand Primary */
+  --color-brand: var(--brand-primary);
+  --color-brand-hover: #E60000;
+
+  --font-sans: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-xl: 12px;
+  --radius-2xl: 12px;
+  --radius-3xl: 12px;
+
+  --animate-shimmer: shimmer 1.2s linear infinite;
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 5px 8px -2px rgba(0, 0, 0, 0.05), 0 2px 3px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 10px 12px -3px rgba(0, 0, 0, 0.05), 0 4px 5px -3px rgba(0, 0, 0, 0.05);
+  --shadow-2xl: 0 12px 25px -6px rgba(0, 0, 0, 0.1);
+  --shadow-premium: var(--shadow-lg);
+
+  --drop-shadow-sm: 0 1px 1px rgba(0, 0, 0, 0.05);
+  --drop-shadow-md: 0 2px 2px rgba(0, 0, 0, 0.07);
+
+  --blur-sm: 2px;
+  --blur-md: 4px;
+  --blur-lg: 8px;
+  --blur-xl: 12px;
+  --blur-2xl: 20px;
+  --blur-3xl: 32px;
+
+  @keyframes shimmer {
+    from {
+      background-position: -100% 0;
+    }
+
+    to {
+      background-position: 100% 0;
+    }
+  }
+
+  @keyframes pulse-glow {
+
+    0%,
+    100% {
+      opacity: 1;
+      filter: drop-shadow(0 0 1px rgba(0, 200, 83, 0.25));
+    }
+
+    50% {
+      opacity: 0.7;
+      filter: drop-shadow(0 0 3px rgba(0, 200, 83, 0.4));
+    }
+  }
+}
+
+:root.dark {
+  --background: #0D1217;
+  --foreground: #F9FAFB;
+  --surface: #1F2A37;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+@layer base {
+  body {
+    @apply font-sans;
+    font-weight: 400;
+  }
+
+  /* Limita o peso máximo da fonte em toda a aplicação */
+  b,
+  strong,
+  .font-bold,
+  .font-extrabold,
+  .font-black {
+    font-weight: 800 !important;
+  }
+
+  * {
+    @apply border-gray-200 dark:border-gray-800;
+  }
+}
+
+/* Esconde scrollbar mas mantém scroll funcional */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Bloqueia scroll do body quando modal está aberto */
+body.drawer-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  touch-action: none;
+}
