@@ -98,6 +98,9 @@ CREATE POLICY "Users can insert own order items" ON order_items FOR INSERT WITH 
 CREATE POLICY "Admins bypass RLS on orders" ON orders FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
 );
+CREATE POLICY "Admins bypass RLS on order_items" ON order_items FOR ALL USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
+);
 CREATE POLICY "Admins bypass RLS on categories" ON categories FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
 );
