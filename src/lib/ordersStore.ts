@@ -30,15 +30,32 @@ interface OrdersStore {
     refreshDelays: () => void;
     subscribe: () => void;
     unsubscribe: () => void;
+    unlockAudio: () => void;
 }
 
 let channel: any = null;
+let notificationAudio: HTMLAudioElement | null = null;
 
 export const useOrdersStore = create<OrdersStore>((set, get) => ({
     orders: [],
     maxEstimatedTime: 45,
     delayedOrdersCount: 0,
     lastRefresh: Date.now(),
+
+    unlockAudio: () => {
+        if (typeof window !== "undefined" && !notificationAudio) {
+            try {
+                notificationAudio = new Audio("/notify.mp3");
+                notificationAudio.volume = 1;
+                notificationAudio.play().then(() => {
+                    notificationAudio!.pause();
+                    notificationAudio!.currentTime = 0;
+                }).catch(e => console.log("Unlock bloqueado:", e));
+            } catch (e) {
+                console.error("Audio unlock fallback error", e);
+            }
+        }
+    },
 
     setOrders: (orders) => {
         set({ orders });
@@ -65,7 +82,7 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
         const now = Date.now();
         const delayedCount = orders.filter((order) => {
             if (["COMPLETED", "CANCELLED"].includes(order.status)) return false;
-            if (order.status === "READY" || order.status === "DELIVERY") return false; // Por enquanto apenas Novos e Preparando
+            if (order.status === "READY" || order.status === "DELIVERY") return false;
 
             const createdAt = new Date(order.created_at).getTime();
             const elapsedMinutes = (now - createdAt) / 60000;
@@ -88,20 +105,35 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
                     const { orders } = get();
 
                     if (eventType === "INSERT") {
-                        // Alerta sonoro para novo pedido
-                        try {
-                            const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
-                            audio.volume = 0.5;
-                            audio.play().catch(e => console.log("Audio play blocked by browser:", e));
-                        } catch (e) {
-                            console.error("Erro ao tocar alerta:", e);
+                        // Toca o alarme global
+                        if (notificationAudio) {
+                            notificationAudio.currentTime = 0;
+                            notificationAudio.play().catch(e => console.log("Audio block:", e));
                         }
 
-                        set({ orders: [next as Order, ...orders] });
+                        // Busca pormenorizado do pedido com os itens (pois payload.new vem raso)
+                        (async () => {
+                            const { data } = await supabase.from('orders').select(`
+                                *,
+                                order_items (
+                                    id, name, quantity, unit_price, notes, extras,
+                                    product:products ( name )
+                                )
+                            `).eq('id', next.id).single();
+
+                            if (data) {
+                                const st = get();
+                                if (!st.orders.some(o => o.id === data.id)) {
+                                    set({ orders: [data as Order, ...st.orders] });
+                                    st.refreshDelays();
+                                }
+                            }
+                        })();
                     } else if (eventType === "UPDATE") {
                         if (next.status === "COMPLETED" || next.status === "CANCELLED") {
                             set({ orders: orders.filter((o) => o.id !== next.id) });
                         } else {
+                            // Sync status directly or fetch if needed
                             get().updateOrder(next as Order);
                         }
                     } else if (eventType === "DELETE") {
@@ -115,7 +147,8 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
 
     unsubscribe: () => {
         if (channel) {
-            channel.unsubscribe();
+            const supabase = createClient();
+            supabase.removeChannel(channel);
             channel = null;
         }
     }

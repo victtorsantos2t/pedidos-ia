@@ -40,27 +40,33 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
 };
 
 export function AdminOrdersManagement({ initialOrders }: { initialOrders: any[] }) {
-    const [orders, setOrders] = useState(initialOrders);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("ALL");
-
     // Store Hooks
+    const orders = useOrdersStore(s => s.orders);
     const setStoreOrders = useOrdersStore(s => s.setOrders);
     const refreshDelays = useOrdersStore(s => s.refreshDelays);
+    const subscribeStore = useOrdersStore(s => s.subscribe);
+    const unsubscribeStore = useOrdersStore(s => s.unsubscribe);
+    const updateOrder = useOrdersStore(s => s.updateOrder);
 
     useEffect(() => {
         setStoreOrders(initialOrders);
         refreshDelays();
+        subscribeStore();
 
         const interval = setInterval(() => {
             setCurrentTime(new Date());
             refreshDelays();
         }, 30000);
 
-        return () => clearInterval(interval);
-    }, [initialOrders, setStoreOrders, refreshDelays]);
+        return () => {
+            clearInterval(interval);
+            unsubscribeStore();
+        };
+    }, [initialOrders, setStoreOrders, refreshDelays, subscribeStore, unsubscribeStore]);
 
     // Estados do Cancelamento
     const [cancelStep, setCancelStep] = useState<"IDLE" | "CONFIRM" | "REASON">("IDLE");
@@ -499,8 +505,8 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: any[] 
                                                     if (res.error) {
                                                         alert(res.error);
                                                     } else {
-                                                        // Atualiza o estado local
-                                                        setOrders(prev => prev.map(o => o.id === selectedOrder.id ? { ...o, status: "CANCELLED", cancel_reason: finalReason } : o));
+                                                        // Atualiza o estado global
+                                                        updateOrder({ id: selectedOrder.id, status: "CANCELLED" });
                                                         setSelectedOrder({ ...selectedOrder, status: "CANCELLED", cancel_reason: finalReason });
                                                         setCancelStep("IDLE");
                                                         setCancelReason("");

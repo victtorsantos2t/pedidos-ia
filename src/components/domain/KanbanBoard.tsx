@@ -52,7 +52,6 @@ const STATUS_FLOW: Record<OrderStatus, OrderStatus | null> = {
 };
 
 export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: Order[], storeSettings: any }) {
-    const [orders, setOrders] = useState<Order[]>(initialOrders);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [soundEnabled, setSoundEnabled] = useState(false);
 
@@ -61,14 +60,16 @@ export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: O
     const [cancelReason, setCancelReason] = useState("");
     const [customReason, setCustomReason] = useState("");
     const [isCancelling, setIsCancelling] = useState(false);
-    const isCancellingRef = useRef(false);
 
     // Store Hooks
+    const orders = useOrdersStore(s => s.orders);
     const setStoreOrders = useOrdersStore(s => s.setOrders);
     const setStoreSettings = useOrdersStore(s => s.setStoreSettings);
     const subscribeStore = useOrdersStore(s => s.subscribe);
     const unsubscribeStore = useOrdersStore(s => s.unsubscribe);
     const refreshDelays = useOrdersStore(s => s.refreshDelays);
+    const updateOrder = useOrdersStore(s => s.updateOrder);
+    const unlockAudio = useOrdersStore(s => s.unlockAudio);
 
     const ADMIN_CANCEL_REASONS = [
         "Estoque esgotado",
@@ -78,60 +79,23 @@ export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: O
         "Pedido duplicado",
         "Outro"
     ];
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const NOTIFY_SOUND = "data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTdvT18AAAAA";
-
     useEffect(() => {
-        audioRef.current = new Audio("/notify.mp3");
-
-        // Inicializa o Store
+        // Inicializa o Store com os props pre-renderizados e ativa conexao WebSocket
         setStoreSettings(storeSettings);
         setStoreOrders(initialOrders);
         subscribeStore();
 
-        // Atualiza o tempo a cada 10 segundos para o cronômetro
+        // Atualiza cronômetro visual local
         const timeInterval = setInterval(() => {
             setCurrentTime(new Date());
             refreshDelays();
         }, 10000);
 
-        const supabase = createClient();
-        const channel = supabase
-            .channel("kanban-orders-realtime")
-            .on(
-                "postgres_changes",
-                { event: "INSERT", schema: "public", table: "orders" },
-                (payload) => {
-                    if (soundEnabled && audioRef.current) {
-                        audioRef.current.play().catch(() => {
-                            new Audio(NOTIFY_SOUND).play().catch(() => { });
-                        });
-                    }
-                    window.location.reload();
-                }
-            )
-            .on(
-                "postgres_changes",
-                { event: "UPDATE", schema: "public", table: "orders" },
-                (payload) => {
-                    const newRow = payload.new as Order;
-                    if (newRow.status === "CANCELLED") {
-                        if (isCancellingRef.current) return;
-                        setOrders((prev) => prev.filter(o => o.id !== newRow.id));
-                    } else {
-                        setOrders((prev) => prev.map(o => o.id === newRow.id ? { ...o, status: newRow.status } : o));
-                    }
-                    refreshDelays();
-                }
-            )
-            .subscribe();
-
         return () => {
-            supabase.removeChannel(channel);
             unsubscribeStore();
             clearInterval(timeInterval);
         };
-    }, [soundEnabled, initialOrders, storeSettings, setStoreOrders, setStoreSettings, subscribeStore, unsubscribeStore, refreshDelays]);
+    }, [initialOrders, storeSettings, setStoreOrders, setStoreSettings, subscribeStore, unsubscribeStore, refreshDelays]);
 
     const handleAdvanceStatus = async (orderId: string, currentStatus: OrderStatus, deliveryMethod: string) => {
         let nextStatus = STATUS_FLOW[currentStatus];
@@ -140,7 +104,10 @@ export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: O
         }
         if (!nextStatus) return;
 
-        setOrders((prev) => prev.map(o => o.id === orderId ? { ...o, status: nextStatus as OrderStatus } : o));
+        // Atualização Otimista no Store Global
+        updateOrder({ id: orderId, status: nextStatus as OrderStatus });
+
+        // Chamada real
         await updateOrderStatus(orderId, nextStatus);
         refreshDelays();
     };
@@ -148,17 +115,15 @@ export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: O
     const handleCancelOrder = async () => {
         if (!orderToCancel) return;
         setIsCancelling(true);
-        isCancellingRef.current = true;
         const finalReason = cancelReason === "Outro" ? customReason : cancelReason;
         const res = await updateOrderStatus(orderToCancel, "CANCELLED", finalReason || "Cancelado pela loja");
         if (!res.error) {
-            setOrders((prev) => prev.filter(o => o.id !== orderToCancel));
+            updateOrder({ id: orderToCancel, status: "CANCELLED" });
             setOrderToCancel(null);
             setCancelReason("");
             setCustomReason("");
         }
         setIsCancelling(false);
-        isCancellingRef.current = false;
         refreshDelays();
     };
 
@@ -168,7 +133,11 @@ export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: O
                 <Button
                     variant={soundEnabled ? "default" : "outline"}
                     className={cn("rounded-full h-14 w-14 shadow-2xl flex items-center justify-center transition-all", soundEnabled ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-white dark:bg-gray-800')}
-                    onClick={() => setSoundEnabled(!soundEnabled)}
+                    onClick={() => {
+                        const isEnabling = !soundEnabled;
+                        setSoundEnabled(isEnabling);
+                        if (isEnabling) unlockAudio();
+                    }}
                 >
                     {soundEnabled ? <Clock className="w-6 h-6 animate-pulse" /> : <ArrowRight className="w-6 h-6 rotate-90" />}
                 </Button>
