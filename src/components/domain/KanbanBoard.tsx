@@ -194,63 +194,70 @@ export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: O
                                 return (
                                     <motion.div key={order.id} layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
                                         <Card className={cn(
-                                            "border shadow-sm transition-all duration-500",
-                                            col.color,
+                                            "border shadow-sm transition-all duration-500 rounded-[14px] bg-blue-50/50 dark:bg-blue-950/10 border-blue-200/60",
                                             isDelayed ? "border-2 border-[#FA0000] animate-[pulse_2s_infinite] shadow-[0_0_20px_rgba(250,0,0,0.4)] bg-white dark:bg-gray-900" : ""
                                         )}>
-                                            <CardHeader className="p-4 pb-2">
+                                            <CardHeader className="p-4 pb-0">
                                                 <div className="flex items-start justify-between">
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-2 mt-1">
                                                         {isDelayed && (
                                                             <div className="h-8 w-8 rounded-lg bg-[#FA0000] text-white flex items-center justify-center animate-bounce shadow-lg shadow-red-500/40">
                                                                 <AlertCircle className="h-5 w-5" />
                                                             </div>
                                                         )}
-                                                        <div>
-                                                            <CardTitle className={cn("text-base tracking-tighter italic", isDelayed ? "text-[#FA0000] font-black" : "text-foreground")}>#{order.id.slice(0, 6).toUpperCase()}</CardTitle>
-                                                            <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest">{order.customer_name}</p>
+                                                        <div className="flex flex-col">
+                                                            <CardTitle className={cn("text-lg font-black italic tracking-tighter", isDelayed ? "text-[#FA0000]" : "text-[#111827] dark:text-gray-100")}>#{order.id.slice(0, 6).toUpperCase()}</CardTitle>
+                                                            <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest mt-0.5">{order.customer_name}</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex flex-col items-end">
                                                         {isDelayed ? (
-                                                            <div className="bg-[#FA0000] text-white px-2 py-1 rounded-lg text-[11px] font-black italic tracking-tighter flex items-center gap-1.5 shadow-lg shadow-red-500/20">
+                                                            <div className="bg-[#FA0000] text-white px-2 py-1 rounded-lg text-[11px] font-black italic tracking-tighter flex items-center gap-1.5 shadow-lg shadow-red-500/20 mb-1">
                                                                 <Clock className="h-3 w-3" />
                                                                 <span>-{Math.abs(remainingMin)} MIN</span>
                                                             </div>
                                                         ) : (
-                                                            <div className="text-sm font-black text-foreground tabular-nums opacity-40 italic">
+                                                            <div className="text-sm font-black text-gray-500 dark:text-gray-400 tabular-nums italic mb-1">
                                                                 {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(order.total_amount)}
                                                             </div>
                                                         )}
-                                                        <p className="mt-1 text-[9px] uppercase font-bold text-gray-400 opacity-60 italic">{order.payment_method === "ON_DELIVERY" ? "PGTO ENTREGA" : "PGTO PIX"}</p>
+                                                        <p className="text-[9px] font-black uppercase tracking-widest text-[#E5E7EB] dark:text-gray-700 italic">
+                                                            {order.payment_method === "ON_DELIVERY" ? "PGTO ENTREGA" : "PGTO PIX"}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </CardHeader>
-                                            <CardContent className="p-4 pt-0">
-                                                <div className="space-y-3">
-                                                    <ul className="text-sm space-y-1 mt-2 text-foreground font-medium bg-white/50 dark:bg-black/20 p-2 rounded-lg border border-white/20">
-                                                        {order.order_items?.map((item) => (
-                                                            <li key={item.id} className="flex flex-col border-b border-gray-100 dark:border-gray-800 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">
-                                                                <span className="font-bold text-xs uppercase tracking-tighter text-foreground italic"><span className="text-[#FA0000] mr-2">{item.quantity}x</span> {item.name || item.product?.name}</span>
-                                                                {item.notes && <p className="text-[10px] italic text-[#FA0000] font-black pl-2 mt-1 border-l-2 border-[#FA0000]/20 bg-red-500/5 px-1 py-0.5 rounded">Obs: {item.notes}</p>}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                    <div className="mt-3 flex flex-col gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-tight italic">
-                                                        <div className="flex items-center gap-2 truncate"><MapPin className="h-3 w-3 text-gray-300" /> {order.delivery_address}</div>
-                                                        <div className="flex items-center gap-2"><Clock className={cn("h-3 w-3", isDelayed ? "text-[#FA0000]" : "text-gray-300")} /> <span className={cn(isDelayed && "text-[#FA0000] font-black")}>{new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {isDelayed && `(Atraso: ${elapsedMin}min)`}</span></div>
+                                            <CardContent className="p-4 pt-3">
+                                                <div className="space-y-4">
+                                                    {/* Fake label just for visual match (could be items here normally) */}
+                                                    <div className="h-4 w-full bg-white/60 dark:bg-black/20 rounded-full mb-4 mt-1" />
+
+                                                    <div className="flex flex-col gap-1.5 text-[9px] font-black text-gray-400 uppercase tracking-widest italic opacity-60">
+                                                        <div className="flex items-center gap-2 truncate line-clamp-1">{order.delivery_address}</div>
+                                                        <div className="flex items-center gap-2"><Clock className={cn("h-3 w-3", isDelayed ? "text-[#FA0000]" : "")} /> <span className={cn(isDelayed && "text-[#FA0000] font-black")}>{new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}  {isDelayed && `(Atraso: ${elapsedMin}min)`}</span></div>
                                                     </div>
                                                 </div>
                                             </CardContent>
-                                            <CardFooter className="p-4 pt-0 flex gap-2">
+                                            <CardFooter className="p-4 pt-0 flex items-center justify-between gap-3 border-t border-blue-100/50 dark:border-blue-900/30 mt-2">
                                                 {isDelayed ? (
-                                                    <Button className="w-full h-11 bg-[#FA0000] hover:bg-[#D00000] text-white text-[10px] font-black uppercase italic tracking-widest shadow-lg shadow-red-500/20 gap-2 border-0" onClick={() => handleAdvanceStatus(order.id, order.status, order.payment_method)}>
+                                                    <Button className="w-full h-11 bg-[#FA0000] hover:bg-[#D00000] text-white text-[10px] font-black uppercase italic tracking-widest shadow-lg shadow-red-500/20 gap-2 border-0 mt-3" onClick={() => handleAdvanceStatus(order.id, order.status, order.payment_method)}>
                                                         <ChefHat className="h-4 w-4" /> PRIORIZAR NA COZINHA
                                                     </Button>
                                                 ) : (
                                                     <>
-                                                        <Button variant="ghost" className="flex-1 text-[10px] h-10 gap-2 text-gray-400 hover:text-red-500 hover:bg-red-50 font-bold uppercase italic" onClick={() => setOrderToCancel(order.id)}><XCircle className="h-3 w-3" /> Cancelar</Button>
-                                                        <Button className="flex-[2] text-[10px] h-10 gap-2 font-black uppercase italic tracking-widest" onClick={() => handleAdvanceStatus(order.id, order.status, order.payment_method)}>Avançar <ArrowRight className="h-4 w-4" /></Button>
+                                                        <button
+                                                            className="flex items-center gap-1.5 text-[10px] text-gray-300 font-black uppercase italic tracking-widest hover:text-red-500 transition-colors mt-3"
+                                                            onClick={() => setOrderToCancel(order.id)}
+                                                        >
+                                                            <XCircle className="h-3.5 w-3.5" /> CANCELAR
+                                                        </button>
+
+                                                        <Button
+                                                            className="h-10 px-5 rounded-lg bg-[#FA0000] hover:bg-[#D00000] text-white text-[11px] font-black uppercase italic tracking-widest shadow-lg shadow-red-500/20 flex items-center gap-2 mt-3"
+                                                            onClick={() => handleAdvanceStatus(order.id, order.status, order.payment_method)}
+                                                        >
+                                                            Avançar <ArrowRight className="h-4 w-4" />
+                                                        </Button>
                                                     </>
                                                 )}
                                             </CardFooter>
