@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createAddress, deleteAddress, setDefaultAddress, updateAddress } from "@/lib/actions/profileActions";
 import { Input, Label } from "@/components/core/Input";
 import { ArrowLeft, MapPin, Plus, Trash2, CheckCircle2, Loader2, Edit3, X, AlertTriangle, Hash, Landmark, Navigation2 } from "lucide-react";
@@ -31,17 +31,37 @@ export function AddressManager({ initialAddresses }: { initialAddresses: Address
     const [neighborhood, setNeighborhood] = useState("");
     const [city, setCity] = useState("");
 
+    const [cepValue, setCepValue] = useState("");
+
+    // O useEffect aqui serve pra refletir o CEP quando for editar o endereço existente
+    useEffect(() => {
+        if (isAdding && editingAddress?.cep) {
+            setCepValue(editingAddress.cep);
+        } else if (!isAdding) {
+            setCepValue("");
+        }
+    }, [isAdding, editingAddress]);
+
     const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const cep = e.target.value.replace(/\D/g, "");
+        const rawValue = e.target.value;
+        const cep = rawValue.replace(/\D/g, "");
+
+        // Formata visualmente
+        let formattedCep = cep;
+        if (cep.length > 5) {
+            formattedCep = cep.replace(/^(\d{5})(\d{1,3})/, "$1-$2");
+        }
+        setCepValue(formattedCep);
+
         if (cep.length === 8) {
             setCepLoading(true);
             try {
                 const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
                 const data = await res.json();
                 if (!data.erro) {
-                    setStreet(data.logradouro);
-                    setNeighborhood(data.bairro);
-                    setCity(data.localidade);
+                    setStreet(data.logradouro || "");
+                    setNeighborhood(data.bairro || "");
+                    setCity(data.localidade || "");
                 }
             } catch (err) {
                 console.error("Erro ao buscar CEP:", err);
@@ -57,6 +77,7 @@ export function AddressManager({ initialAddresses }: { initialAddresses: Address
         setStreet("");
         setNeighborhood("");
         setCity("");
+        setCepValue("");
     };
 
     const startEditing = (addr: Address) => {
@@ -124,10 +145,10 @@ export function AddressManager({ initialAddresses }: { initialAddresses: Address
                                 <Label>CEP</Label>
                                 <Input
                                     name="cep"
-                                    maxLength={8}
+                                    maxLength={9}
+                                    value={cepValue}
                                     onChange={handleCepChange}
-                                    defaultValue={editingAddress?.cep || ""}
-                                    placeholder="Ex: 00000000"
+                                    placeholder="Ex: 00000-000"
                                     leftIcon={<MapPin className="h-5 w-5" />}
                                     rightIcon={cepLoading ? <Loader2 className="h-4 w-4 animate-spin text-brand" /> : null}
                                     required

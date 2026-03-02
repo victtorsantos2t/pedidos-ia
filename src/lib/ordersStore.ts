@@ -38,7 +38,7 @@ let audioContext: AudioContext | null = null;
 let audioUnlocked = false;
 
 // Melodia de notificação — 5 notas ascendentes com sustain
-function playBeep() {
+export function playBeep() {
     if (!audioContext || !audioUnlocked) return;
 
     const notes = [

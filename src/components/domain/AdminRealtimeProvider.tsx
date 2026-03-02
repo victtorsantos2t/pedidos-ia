@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useEffect, ReactNode, useRef, useState } from "react";
-import { useOrdersStore } from "@/lib/ordersStore";
+import { useOrdersStore, playBeep } from "@/lib/ordersStore";
 import { getActiveOrders } from "@/lib/actions/adminActions";
 import { BellRing, BellOff } from "lucide-react";
 
@@ -24,13 +24,11 @@ export function AdminRealtimeProvider({
     const delayedCount = useOrdersStore((s) => s.delayedOrdersCount);
     const prevDelayedCount = useRef(0);
     const prevOrdersCount = useRef(initialOrders.length);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const unlockAudio = useOrdersStore((s) => s.unlockAudio);
 
     const [audioEnabled, setAudioEnabled] = useState(false);
 
     useEffect(() => {
-        audioRef.current = new Audio("/urgent.mp3");
-
         // Inicializa o store
         setOrders(initialOrders);
         setSettings(storeSettings);
@@ -67,10 +65,7 @@ export function AdminRealtimeProvider({
 
     const tryPlayAudio = () => {
         if (!audioEnabled) return;
-        if (audioRef.current) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play().catch(() => console.log("Áudio bloqueado pelo navegador."));
-        }
+        playBeep();
     };
 
     // Efeito para som de alerta de atraso (Urgent Orders)
@@ -83,21 +78,17 @@ export function AdminRealtimeProvider({
 
     const handleEnableAudio = () => {
         setAudioEnabled(true);
-        // Toca num volume imperceptível para furar o bloqueio de AutoPlay do DOM
-        if (audioRef.current) {
-            audioRef.current.volume = 0.01;
-            audioRef.current.play().then(() => {
-                setTimeout(() => { if (audioRef.current) audioRef.current.volume = 1; }, 500);
-            }).catch(() => { });
-        }
+        // Toca num volume imperceptível e ativa no clique
+        unlockAudio(); // Ativa contexto nativo (feito no ordersStore)
+        setTimeout(() => playBeep(), 100); // testa o Beep real
     };
 
     return (
         <>
             {!audioEnabled && (
-                <div className="fixed top-4 right-4 z-50 bg-red-600/90 text-white px-4 py-2 rounded-full shadow-2xl flex items-center gap-3 backdrop-blur-md cursor-pointer hover:bg-red-700 transition-all animate-bounce" onClick={handleEnableAudio}>
+                <div className="fixed top-4 right-4 z-[9999] bg-red-600/90 text-white px-4 py-2 rounded-full shadow-2xl flex items-center gap-3 backdrop-blur-md cursor-pointer hover:bg-red-700 transition-all animate-bounce border border-red-500" onClick={handleEnableAudio}>
                     <BellOff className="w-5 h-5 animate-pulse" />
-                    <span className="text-sm font-bold tracking-tight">Habilitar Alerta Sonoro</span>
+                    <span className="text-sm font-bold tracking-tight">Habilitar Alerta Sonoro do App</span>
                 </div>
             )}
             {children}
