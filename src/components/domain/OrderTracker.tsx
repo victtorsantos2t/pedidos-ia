@@ -55,7 +55,7 @@ export function OrderTracker({ initialOrder, initialRating, storeConfig, ratingS
         const supabase = createClient();
 
         const channel = supabase
-            .channel(`order-track-${order.id}`)
+            .channel(`order-status-${order.id}`)
             .on(
                 "postgres_changes",
                 {
@@ -65,13 +65,17 @@ export function OrderTracker({ initialOrder, initialRating, storeConfig, ratingS
                     filter: `id=eq.${order.id}`,
                 },
                 (payload) => {
+                    console.log("[Realtime] Status do pedido atualizado:", payload.new.status);
                     setOrder((prev: any) => ({ ...prev, status: payload.new.status }));
+
                     if (typeof window !== "undefined" && navigator.vibrate) {
                         navigator.vibrate([100, 50, 100]);
                     }
                 }
             )
-            .subscribe();
+            .subscribe((status) => {
+                console.log(`[Realtime] Subscription status for order ${order.id}:`, status);
+            });
 
         return () => {
             supabase.removeChannel(channel);
