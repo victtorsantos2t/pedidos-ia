@@ -53,10 +53,21 @@ export function AdminRealtimeProvider({
             } catch (err) { }
         }, 20000);
 
+        // 3. Alerta Recorrente para Pedidos Pendentes (NEW)
+        // Se houver pedido em status NOVO, repete o som a cada 1 minuto
+        const alertLoopInterval = setInterval(() => {
+            const currentOrders = useOrdersStore.getState().orders;
+            const hasNewPendingOrders = currentOrders.some(o => o.status === "NEW");
+            if (hasNewPendingOrders) {
+                tryPlayAudio();
+            }
+        }, 60000);
+
         return () => {
             unsubscribe();
             clearInterval(delayInterval);
             clearInterval(fallbackInterval);
+            clearInterval(alertLoopInterval);
         };
     }, [initialOrders, storeSettings, setOrders, setSettings, subscribe, unsubscribe, refreshDelays]);
 

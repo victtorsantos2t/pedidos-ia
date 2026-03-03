@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
     LayoutDashboard,
     ChefHat,
@@ -13,7 +13,7 @@ import {
     Settings,
     Bell
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { cn } from "@/lib/utils";
 import { UserButton } from "../core/UserButton";
 import { obterStatusLoja } from "@/lib/actions/adminSettingsActions";
@@ -29,7 +29,19 @@ const menuItems = [
 ];
 
 export function AdminSidebar() {
+    return (
+        <Suspense fallback={<div className="w-20 xl:w-64 bg-white dark:bg-black h-screen border-r border-gray-100 dark:border-gray-800" />}>
+            <AdminSidebarContent />
+        </Suspense>
+    );
+}
+
+function AdminSidebarContent() {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const isFullscreen = searchParams.get("fullscreen") === "true";
+
+    if (isFullscreen) return null;
     const [isOpen, setIsOpen] = useState(false);
     const [isStoreOpen, setIsStoreOpen] = useState(true);
     const delayedCount = useOrdersStore((state) => state.delayedOrdersCount);
@@ -94,7 +106,8 @@ export function AdminSidebar() {
                         return (
                             <Link
                                 key={item.href}
-                                href={item.href}
+                                href={item.name.includes("Cozinha") ? `${item.href}?fullscreen=true` : item.href}
+                                target={item.name.includes("Cozinha") ? "_blank" : undefined}
                                 onClick={() => setIsOpen(false)}
                                 className={cn(
                                     "relative flex h-[52px] items-center gap-4 mx-4 xl:mx-4 lg:mx-2 px-5 lg:px-0 xl:px-5 lg:justify-center xl:justify-start rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 group",

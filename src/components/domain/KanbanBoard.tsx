@@ -69,6 +69,7 @@ export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: O
     const refreshDelays = useOrdersStore(s => s.refreshDelays);
     const updateOrder = useOrdersStore(s => s.updateOrder);
     const unlockAudio = useOrdersStore(s => s.unlockAudio);
+    const audioUnlocked = useOrdersStore(s => s.audioUnlocked);
 
     const ADMIN_CANCEL_REASONS = [
         "Estoque esgotado",
@@ -274,6 +275,22 @@ export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: O
                     </div>
                 )}
             </AnimatePresence>
+            {/* Indicador de Status de Áudio (Crucial para Monitores de Cozinha) */}
+            {!audioUnlocked && (
+                <div className="fixed bottom-10 right-10 z-[100]">
+                    <motion.button
+                        initial={{ opacity: 0, y: 50, scale: 0.5 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => unlockAudio()}
+                        className="bg-brand text-white px-8 py-5 rounded-3xl shadow-[0_20px_50px_rgba(250,0,0,0.4)] border-4 border-white flex items-center gap-4 font-black uppercase italic tracking-widest text-base animate-bounce"
+                    >
+                        <BellOff className="h-7 w-7" />
+                        Clique para Ativar o Som
+                    </motion.button>
+                </div>
+            )}
         </div>
     );
 }

@@ -23,6 +23,7 @@ interface OrdersStore {
     maxEstimatedTime: number;
     delayedOrdersCount: number;
     lastRefresh: number;
+    audioUnlocked: boolean;
 
     setOrders: (orders: Order[]) => void;
     updateOrder: (order: Partial<Order> & { id: string }) => void;
@@ -31,6 +32,7 @@ interface OrdersStore {
     subscribe: () => void;
     unsubscribe: () => void;
     unlockAudio: () => void;
+    setAudioUnlocked: (unlocked: boolean) => void;
 }
 
 let channel: any = null;
@@ -86,6 +88,7 @@ function setupAutoUnlock() {
             g.gain.setValueAtTime(0.001, audioContext.currentTime);
             o.start(); o.stop(audioContext.currentTime + 0.05);
             audioUnlocked = true;
+            useOrdersStore.getState().setAudioUnlocked(true);
             console.log("[Audio] Desbloqueado automaticamente!");
         } catch (e) {
             console.warn("[Audio] Auto-unlock falhou:", e);
@@ -109,6 +112,9 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
     maxEstimatedTime: 45,
     delayedOrdersCount: 0,
     lastRefresh: Date.now(),
+    audioUnlocked: false,
+
+    setAudioUnlocked: (unlocked: boolean) => set({ audioUnlocked: unlocked }),
 
     unlockAudio: () => {
         if (typeof window !== "undefined" && !audioUnlocked) {
@@ -122,6 +128,7 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
                 osc.start();
                 osc.stop(audioContext.currentTime + 0.1);
                 audioUnlocked = true;
+                set({ audioUnlocked: true });
                 console.log("[Audio] Web Audio API desbloqueada com sucesso!");
             } catch (e) {
                 console.error("[Audio] Falha ao desbloquear Web Audio API:", e);
