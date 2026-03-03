@@ -77,8 +77,25 @@ export function OrderTracker({ initialOrder, initialRating, storeConfig, ratingS
                 console.log(`[Realtime] Subscription status for order ${order.id}:`, status);
             });
 
+        // 🛡️ BACKUP: Polling Híbrido para Produção
+        // Em rede móvel ou ambientes de produção, o WebSocket pode oscilar.
+        // Esse timer garante que o status atualize em no máximo 30s mesmo se o Realtime falhar.
+        const fallbackInterval = setInterval(async () => {
+            const { data } = await supabase
+                .from("orders")
+                .select("status")
+                .eq("id", order.id)
+                .single();
+
+            if (data && data.status !== order.status) {
+                console.log("[Polling] Status atualizado via backup:", data.status);
+                setOrder((prev: any) => ({ ...prev, status: data.status }));
+            }
+        }, 30000);
+
         return () => {
             supabase.removeChannel(channel);
+            clearInterval(fallbackInterval);
         };
     }, [order.id]);
 
