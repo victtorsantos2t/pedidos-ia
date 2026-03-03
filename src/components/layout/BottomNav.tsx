@@ -28,11 +28,11 @@ export function BottomNav() {
     if (pathname.startsWith("/admin") || pathname.startsWith("/checkout")) return null;
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom,0px)]">
+        <nav className="fixed bottom-0 left-0 right-0 z-50">
             {/* Fade gradiente acima da nav */}
             <div className="h-8 bg-gradient-to-t from-white/60 dark:from-black/60 to-transparent pointer-events-none" />
 
-            <div className="bg-white/90 dark:bg-[#111]/90 backdrop-blur-2xl border-t border-gray-100/80 dark:border-white/[0.06] px-4 pt-2 pb-3 shadow-[0_-8px_32px_rgba(0,0,0,0.10)]">
+            <div className="bg-white/90 dark:bg-[#111]/90 backdrop-blur-2xl border-t border-gray-100/80 dark:border-white/[0.06] px-4 pt-2 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] shadow-[0_-8px_32px_rgba(0,0,0,0.10)]">
                 <div className="max-w-lg mx-auto flex items-end justify-between">
                     {navItems.map((item) => {
                         const isActive =

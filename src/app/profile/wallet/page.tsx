@@ -75,7 +75,7 @@ export default function WalletPage() {
                             <span className="text-xs font-bold uppercase tracking-widest">Em Construção</span>
                         </div>
                         <h2 className="text-3xl font-extrabold text-foreground leading-tight">
-                            Estamos polindo sua nova carteira! ðŸ’Ž
+                            Estamos polindo sua nova carteira! 💎
                         </h2>
                         <p className="text-gray-500 text-sm leading-relaxed px-4">
                             Sua experiência financeira proprietária está sendo construída com carinho. Logo você poderá gerenciar saldos, cashback e pagamentos num toque.
