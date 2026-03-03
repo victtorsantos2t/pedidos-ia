@@ -128,6 +128,35 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
--- 7. Realtime! (A Magia de Ligar os Sockets ao BD)
+-- 7. Configurações da Loja
+CREATE TABLE store_config (
+  id INT PRIMARY KEY DEFAULT 1,
+  is_open BOOLEAN DEFAULT true,
+  store_name VARCHAR(255) DEFAULT 'Minha Loja',
+  contact_phone VARCHAR(50),
+  pickup_address TEXT,
+  delivery_fee DECIMAL(10,2) DEFAULT 0,
+  delivery_radius DECIMAL(10,2) DEFAULT 5, -- Em KM
+  min_order_value DECIMAL(10,2) DEFAULT 0,
+  estimated_time VARCHAR(50) DEFAULT '30-45 min',
+  pickup_estimated_time VARCHAR(50) DEFAULT '15-20 min',
+  description TEXT,
+  logo_url TEXT,
+  payment_methods JSONB DEFAULT '[]'::jsonb,
+  opening_hours JSONB DEFAULT '[]'::jsonb,
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT one_row_only CHECK (id = 1)
+);
+
+ALTER TABLE store_config ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Store config is publically viewable" ON store_config FOR SELECT USING (true);
+CREATE POLICY "Admins bypass RLS on store_config" ON store_config FOR ALL USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
+);
+
+-- Insere configuração inicial se não existir
+INSERT INTO store_config (id, store_name) VALUES (1, 'Minha Loja') ON CONFLICT DO NOTHING;
+
+-- 8. Realtime! (A Magia de Ligar os Sockets ao BD)
 ALTER PUBLICATION supabase_realtime ADD TABLE orders;
 ALTER PUBLICATION supabase_realtime ADD TABLE products;
