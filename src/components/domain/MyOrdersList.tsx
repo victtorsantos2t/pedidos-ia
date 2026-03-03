@@ -56,7 +56,7 @@ export function MyOrdersList({ orders }: { orders: any[] }) {
     return (
         <div className="min-h-screen bg-gray-50/50 dark:bg-black pb-10 transition-colors duration-500">
             {/* Header — Somente Navegação */}
-            <header className="sticky top-0 z-40 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800/50 pt-[calc(env(safe-area-inset-top,0px)+8px)]">
+            <header className="sticky top-0 z-40 bg-white dark:bg-black border-b border-gray-100 dark:border-gray-800/50 pt-[calc(env(safe-area-inset-top,0px)+8px)]">
                 <div className="flex items-center h-16 px-4 max-w-lg mx-auto gap-4">
                     <Link href="/profile" className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all active:scale-90 shrink-0">
                         <ArrowLeft className="h-4 w-4 text-foreground" />
@@ -77,7 +77,7 @@ export function MyOrdersList({ orders }: { orders: any[] }) {
                             onClick={() => setFilter(tab.key)}
                             className="relative flex-1 py-4 text-[11px] font-black uppercase tracking-widest transition-colors duration-300"
                         >
-                            <span className={filter === tab.key ? "text-brand" : "text-gray-400"}>
+                            <span className={filter === tab.key ? "text-brand" : "text-gray-500 dark:text-gray-400"}>
                                 {tab.label}
                             </span>
                             {filter === tab.key && (
