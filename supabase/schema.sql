@@ -49,8 +49,10 @@ CREATE TABLE order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
   product_id UUID REFERENCES products(id) ON DELETE SET NULL,
+  name VARCHAR(255), -- Nome estático do produto no momento da compra
   quantity INT NOT NULL,
   unit_price DECIMAL(10,2) NOT NULL, -- Snapshot do preço da época
+  extras JSONB DEFAULT '[]'::jsonb, -- Armazena os opcionais escolhidos
   notes TEXT
 );
 
