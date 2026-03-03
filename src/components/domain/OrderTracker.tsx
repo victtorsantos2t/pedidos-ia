@@ -158,7 +158,7 @@ export function OrderTracker({ initialOrder, initialRating, storeConfig, ratingS
                             <ArrowLeft className="h-5 w-5 text-foreground" />
                         </button>
                         <div>
-                            <h1 className="text-sm font-black uppercase italic tracking-tighter text-gray-400 leading-none mb-1">Status do Pedido</h1>
+                            <h1 className="text-sm font-black uppercase italic tracking-tighter text-gray-600 dark:text-gray-400 leading-none mb-1">Status do Pedido</h1>
                             <button
                                 id="copy-btn"
                                 onClick={copyOrderId}
@@ -442,8 +442,8 @@ export function OrderTracker({ initialOrder, initialRating, storeConfig, ratingS
                             className="w-full max-w-md bg-white dark:bg-gray-950 rounded-t-[3rem] p-8 shadow-xl pb-[calc(env(safe-area-inset-bottom,0px)+32px)]"
                         >
                             <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mb-8" />
-                            <h3 className="text-xl font-black uppercase italic tracking-tighter mb-2">Central de Ajuda</h3>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-8">Como podemos te ajudar com o pedido #{order.id.slice(0, 6)}?</p>
+                            <h3 className="text-xl font-black uppercase italic tracking-tighter mb-2 text-foreground">Central de Ajuda</h3>
+                            <p className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-8">Como podemos te ajudar com o pedido #{order.id.slice(0, 6)}?</p>
 
                             <div className="space-y-3">
                                 {(order.status === 'NEW' || order.status === 'PREPARING') && (
@@ -453,9 +453,9 @@ export function OrderTracker({ initialOrder, initialRating, storeConfig, ratingS
                                     >
                                         <div className="text-left">
                                             <p className="text-xs font-black uppercase italic text-red-600">Cancelar Pedido</p>
-                                            <p className="text-[9px] font-bold text-red-400 opacity-70">Ainda é possível cancelar agora</p>
+                                            <p className="text-[9px] font-black text-red-500/60 uppercase tracking-tight">Ainda é possível cancelar agora</p>
                                         </div>
-                                        <XCircle className="h-5 w-5 text-red-300 group-hover:text-red-500 transition-colors" />
+                                        <XCircle className="h-5 w-5 text-red-400 group-hover:text-red-500 transition-colors" />
                                     </button>
                                 )}
 
@@ -468,14 +468,14 @@ export function OrderTracker({ initialOrder, initialRating, storeConfig, ratingS
                                 >
                                     <div className="text-left">
                                         <p className="text-xs font-black uppercase italic text-emerald-600">Alterar Endereço</p>
-                                        <p className="text-[9px] font-bold text-emerald-400 opacity-70">Fale com nossa equipe agora</p>
+                                        <p className="text-[9px] font-black text-emerald-500/60 uppercase tracking-tight">Fale com nossa equipe agora</p>
                                     </div>
-                                    <MapPin className="h-5 w-5 text-emerald-300 group-hover:text-emerald-500 transition-colors" />
+                                    <MapPin className="h-5 w-5 text-emerald-400 group-hover:text-emerald-500 transition-colors" />
                                 </button>
 
                                 <button
                                     onClick={() => setShowHelpMenu(false)}
-                                    className="w-full h-14 mt-4 rounded-xl bg-gray-50 dark:bg-gray-900 text-[10px] font-black uppercase tracking-widest text-gray-400"
+                                    className="w-full h-14 mt-4 rounded-xl bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-[11px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
                                 >
                                     Fechar
                                 </button>
