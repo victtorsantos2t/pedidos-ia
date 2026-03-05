@@ -32,7 +32,7 @@ export function isStoreOpen(openingHours: OpeningHours[] | undefined): boolean {
         if (!dayPart || !hourPart || !minutePart) return false;
 
         // Limpar o nome do dia (remover maiúsculas e o sufixo "-feira" se existir)
-        let currentDayName = dayPart.toLowerCase().replace('-feira', '');
+        const currentDayName = dayPart.toLowerCase().replace('-feira', '');
 
         // Mapeamento extra para garantir que o "domingo" e "sábado" funcionem
         // mesmo com variações de locale.

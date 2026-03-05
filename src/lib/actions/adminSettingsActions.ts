@@ -28,6 +28,8 @@ export type StoreConfig = {
     min_order_value: number;
     estimated_time: string;
     pickup_estimated_time: string;
+    lat?: number;
+    lng?: number;
     description?: string;
     logo_url?: string;
     payment_methods?: any;
@@ -48,14 +50,16 @@ export async function obterStatusLoja() {
     return isStoreOpen(data.opening_hours as OpeningHours[]);
 }
 
+import { unstable_noStore as noStore } from "next/cache";
+
 export async function obterConfiguracoesLoja(): Promise<StoreConfig | null> {
+    noStore(); // Prevents Next.js caching this server action
     const supabase = await createClient();
     const { data } = await supabase
         .from("store_config")
         .select("*")
         .eq("id", 1)
         .single();
-
     return data as StoreConfig;
 }
 

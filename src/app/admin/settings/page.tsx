@@ -1,4 +1,5 @@
 ﻿import { obterConfiguracoesLoja, StoreConfig } from "@/lib/actions/adminSettingsActions";
+import { listarZonasEntrega } from "@/lib/actions/deliveryActions";
 import { AdminSettingsForm } from "@/components/domain/AdminSettingsForm";
 import { Settings } from "lucide-react";
 
@@ -14,10 +15,12 @@ export default async function AdminSettingsPage() {
         contact_phone: "",
         pickup_address: "Av. Principal, 123",
         delivery_fee: 0,
-        delivery_radius: 5, // <== ATUALIZAÇÃO NECESSÁRIA PARA O TYPESCRIPT
+        delivery_radius: 5,
         min_order_value: 0,
         estimated_time: "30-45 min",
-        pickup_estimated_time: "15-20 min"
+        pickup_estimated_time: "15-20 min",
+        lat: -23.5631,
+        lng: -46.6611
     };
 
     const initialConfig = config || defaultConfig;

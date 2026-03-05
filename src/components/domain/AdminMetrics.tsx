@@ -70,12 +70,12 @@ export function AdminMetrics() {
                             </div>
 
                             <div className="flex flex-col">
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 opacity-70">
+                                <p className="text-xs font-bold text-gray-500 tracking-widest mb-1">
                                     {item.label}
                                 </p>
                                 <h3 className={cn(
-                                    "font-black text-foreground tracking-tighter leading-none group-hover:text-[#FA0000] transition-colors",
-                                    isRevenue ? "text-3xl" : "text-2xl"
+                                    "font-bold text-gray-900 dark:text-white tracking-tight leading-none group-hover:text-[#FA0000] transition-colors",
+                                    isRevenue ? "text-4xl" : "text-3xl"
                                 )}>
                                     {item.value}
                                 </h3>
@@ -97,6 +97,6 @@ export function AdminMetrics() {
                     </Card>
                 );
             })}
-        </div>
+        </div >
     );
 }

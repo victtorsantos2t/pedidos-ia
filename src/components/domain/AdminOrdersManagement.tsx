@@ -29,6 +29,7 @@ import { Button } from "../core/Button";
 import { useOrdersStore } from "@/lib/ordersStore";
 import { parseEstimatedTime } from "@/lib/storeUtils";
 import { useEffect } from "react";
+import type { Order } from "@/components/domain/KanbanBoard";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
     NEW: { label: "Novo", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400", icon: ShoppingBag },
@@ -39,9 +40,9 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
     CANCELLED: { label: "Cancelado", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400", icon: XCircle },
 };
 
-export function AdminOrdersManagement({ initialOrders }: { initialOrders: any[] }) {
+export function AdminOrdersManagement({ initialOrders }: { initialOrders: Order[] }) {
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("ALL");
     // Store Hooks
@@ -311,7 +312,7 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: any[] 
                                             </div>
                                             <p className="text-sm font-medium text-red-700 dark:text-red-400 italic">
                                                 <span className="font-black uppercase text-[10px] opacity-40 block mb-1">Motivo:</span>
-                                                "{selectedOrder.cancel_reason || "Não informado."}"
+                                                &quot;{selectedOrder.cancel_reason || "Não informado."}&quot;
                                             </p>
                                         </div>
                                     )}
@@ -358,7 +359,7 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: any[] 
                                         <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Produtos do Pedido</h4>
                                         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
                                             <ul className="divide-y divide-gray-50 dark:divide-gray-800">
-                                                {selectedOrder.order_items?.map((item: any) => (
+                                                {selectedOrder.order_items?.map((item: { id: string, name?: string, quantity: number, unit_price: number, product?: { name: string }, extras?: { name: string }[], notes?: string }) => (
                                                     <li key={item.id} className="p-6 flex items-start justify-between gap-4">
                                                         <div className="flex gap-4">
                                                             <div className="h-10 w-10 rounded-lg bg-red-500/5 dark:bg-red-500/10 border border-red-500/10 text-[#FA0000] flex items-center justify-center text-xs font-black italic">
@@ -370,7 +371,7 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: any[] 
                                                                 </p>
                                                                 {item.extras && item.extras.length > 0 && (
                                                                     <div className="flex flex-wrap gap-1 mt-2">
-                                                                        {item.extras.map((ex: any, i: number) => (
+                                                                        {item.extras.map((ex: { name: string }, i: number) => (
                                                                             <span key={i} className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] italic bg-gray-50 dark:bg-gray-800 px-1.5 py-0.5 rounded leading-none">
                                                                                 + {ex.name}
                                                                             </span>
@@ -500,14 +501,14 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: any[] 
                                                 onClick={async () => {
                                                     setIsCancelling(true);
                                                     const finalReason = cancelReason === "Outro" ? customReason : cancelReason;
-                                                    const res = await updateOrderStatus(selectedOrder.id, "CANCELLED", finalReason || "Cancelado pela loja");
+                                                    const res = await updateOrderStatus(selectedOrder!.id, "CANCELLED", finalReason || "Cancelado pela loja");
 
                                                     if (res.error) {
                                                         alert(res.error);
                                                     } else {
                                                         // Atualiza o estado global
-                                                        updateOrder({ id: selectedOrder.id, status: "CANCELLED" });
-                                                        setSelectedOrder({ ...selectedOrder, status: "CANCELLED", cancel_reason: finalReason });
+                                                        updateOrder({ id: selectedOrder!.id, status: "CANCELLED" });
+                                                        setSelectedOrder({ ...selectedOrder!, status: "CANCELLED", cancel_reason: finalReason });
                                                         setCancelStep("IDLE");
                                                         setCancelReason("");
                                                         setCustomReason("");

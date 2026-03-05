@@ -35,14 +35,13 @@ export function ProductCard({ product, onAdd, isCompact = false, isFeatured = fa
                     )}
 
                     {/* Badge Mais Pedido */}
-                    <div className="absolute top-2.5 left-2.5 bg-[#222] dark:bg-black/90 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md z-10 backdrop-blur-sm">
+                    <div className="absolute top-2.5 left-2.5 bg-[#222] dark:bg-black/90 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-md z-10 backdrop-blur-sm">
                         Mais pedido
                     </div>
                 </div>
 
                 {/* Info do Produto */}
                 <div className="flex flex-col gap-0.5">
-                    <span className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">a partir de</span>
                     <div className="flex items-center gap-2">
                         <span className="text-[15px] font-black text-color-primary tracking-tighter">
                             {new Intl.NumberFormat("pt-BR", {
@@ -51,12 +50,7 @@ export function ProductCard({ product, onAdd, isCompact = false, isFeatured = fa
                             }).format(product.price)}
                         </span>
                     </div>
-                    {/* Exemplo de desconto se houvesse no modelo de dados, vou simular um sutil para o design */}
-                    <div className="flex items-center gap-1">
-                        <span className="text-[10px] text-gray-500 dark:text-gray-500 font-bold strike-through line-through opacity-80">R$ {(product.price * 1.2).toFixed(2).replace('.', ',')}</span>
-                        <span className="bg-[#00C853] text-white text-[8px] font-black px-1.5 py-0.5 rounded-md">-20%</span>
-                    </div>
-                    <h3 className="text-[13px] font-bold text-color-primary leading-tight mt-1 line-clamp-2 tracking-tight">
+                    <h3 className="text-[12px] font-semibold text-color-secondary leading-tight mt-0.5 line-clamp-2 tracking-tight">
                         {product.name}
                     </h3>
                 </div>

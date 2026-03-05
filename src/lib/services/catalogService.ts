@@ -34,6 +34,7 @@ export async function getCatalog() {
         .from('categories')
         .select('*')
         .eq('is_active', true)
+        .is('deleted_at', null)
         .order('sort_order', { ascending: true })
 
     const { data: products } = await supabase
@@ -47,6 +48,7 @@ export async function getCatalog() {
             )
         `)
         .eq('is_available', true)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
 
     const storeSettings = await obterConfiguracoesLoja();
@@ -66,6 +68,7 @@ export async function getAdminCatalog() {
     const { data: categories } = await supabase
         .from('categories')
         .select('*')
+        .is('deleted_at', null)
         .order('sort_order', { ascending: true })
 
     const { data: products } = await supabase
@@ -78,6 +81,7 @@ export async function getAdminCatalog() {
                 price
             )
         `)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
 
     return {

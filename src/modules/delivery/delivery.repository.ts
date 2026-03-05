@@ -1,18 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { DeliveryZone } from "./delivery.types";
-
-let zonesCache: DeliveryZone[] | null = null;
-let lastFetch = 0;
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutos
+import { unstable_noStore as noStore } from "next/cache";
 
 export async function getDeliveryZones(): Promise<DeliveryZone[]> {
-    const now = Date.now();
-
-    // Cache implementation
-    if (zonesCache && now - lastFetch < CACHE_TTL) {
-        return zonesCache;
-    }
-
+    noStore(); // Garante atualização imediata
     const supabase = await createClient();
     const { data, error } = await supabase
         .from("delivery_zones")
@@ -22,15 +13,12 @@ export async function getDeliveryZones(): Promise<DeliveryZone[]> {
 
     if (error) {
         console.error("[DeliveryRepository] Error fetching zones:", error);
-        return zonesCache || [];
+        return [];
     }
 
-    zonesCache = data as DeliveryZone[];
-    lastFetch = now;
-    return zonesCache;
+    return data as DeliveryZone[];
 }
 
 export async function clearDeliveryCache() {
-    zonesCache = null;
-    lastFetch = 0;
+    // Agora é no-op, não precisamos mais do TTL em Serverless com noStore.
 }

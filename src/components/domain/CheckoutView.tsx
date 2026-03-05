@@ -13,6 +13,9 @@ import { ArrowLeft, MapPin, Navigation, ShoppingBag, CreditCard, Banknote, QrCod
 import { StoreConfig } from "@/lib/actions/adminSettingsActions";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { calculateDeliveryRemote } from "@/modules/delivery/delivery.client";
+import { DeliveryCalculationResult } from "@/modules/delivery/delivery.types";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 const fmt = (v: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
@@ -28,6 +31,7 @@ interface CheckoutViewProps {
 export function CheckoutView({ user, profile, savedAddresses = [], storeSettings, isStoreOpen = true }: CheckoutViewProps) {
     const router = useRouter();
     const { items, totalPrice, totalItems, clearCart } = useCartStore();
+    const { requestPermissionAndSubscribe } = usePushNotifications();
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -37,9 +41,12 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
     const [changeFor, setChangeFor] = useState<string>("");
     const [showSuccess, setShowSuccess] = useState(false);
     const [orderId, setOrderId] = useState<string | null>(null);
-    const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
+    const [isSummaryExpanded, setIsSummaryExpanded] = useState(true);
     const [isOutsideArea, setIsOutsideArea] = useState(false);
     const [isCheckingArea, setIsCheckingArea] = useState(false);
+    const [deliveryResult, setDeliveryResult] = useState<DeliveryCalculationResult | null>(null);
+    const [isAddressDropdownOpen, setIsAddressDropdownOpen] = useState(false);
+    const [showClearCartModal, setShowClearCartModal] = useState(false);
 
     const { addItem } = useCartStore(); // Para o upsell
 
@@ -49,25 +56,45 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
         ? `${defaultAddr.street}, ${defaultAddr.number}${defaultAddr.complement ? ' - ' + defaultAddr.complement : ''}. ${defaultAddr.neighborhood}, ${defaultAddr.city}`
         : "";
 
+    const [selectedAddressObj, setSelectedAddressObj] = useState<any>(defaultAddr);
     const [address, setAddress] = useState(initialAddressString);
 
-    // Validação de Ãrea de Entrega (Simulada para demonstração conforme pedido)
+    // Validação de Ã rea de Entrega (Simulada para demonstração conforme pedido)
+    // Validação de Área de Entrega Real com o Motor de Delivery
     useEffect(() => {
-        if (deliveryMethod === "ON_DELIVERY" && address && storeSettings?.delivery_radius) {
-            setIsCheckingArea(true);
-            // Simula uma chamada de API de distância
-            const timer = setTimeout(() => {
-                // Se o raio for por exemplo 5km e simulamos que está fora (ex: se endereço contiver 'Longe' ou random)
-                const distance = Math.floor(Math.random() * 8) + 1; // 1 a 8km
-                setIsOutsideArea(distance > (storeSettings.delivery_radius || 5));
+        async function checkDelivery() {
+            if (deliveryMethod === "ON_DELIVERY" && selectedAddressObj) {
+                setIsCheckingArea(true);
+                setError(null);
+
+                try {
+                    const lat = selectedAddressObj.lat || 0;
+                    const lng = selectedAddressObj.lng || 0;
+
+                    const result = await calculateDeliveryRemote({
+                        lat,
+                        lng,
+                        orderValue: totalPrice()
+                    });
+
+                    setDeliveryResult(result);
+                    setIsOutsideArea(false); // Sempre false na lógica fixa
+                    setError(null);
+                } catch (err) {
+                    console.error("Erro ao validar entrega:", err);
+                    setError("Erro ao calcular taxa de entrega.");
+                } finally {
+                    setIsCheckingArea(false);
+                }
+            } else {
+                setIsOutsideArea(false);
                 setIsCheckingArea(false);
-            }, 1500);
-            return () => clearTimeout(timer);
-        } else {
-            setIsOutsideArea(false);
-            setIsCheckingArea(false);
+                setDeliveryResult(null);
+            }
         }
-    }, [address, deliveryMethod, storeSettings?.delivery_radius]);
+
+        checkDelivery();
+    }, [selectedAddressObj, deliveryMethod, totalPrice]);
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -79,8 +106,10 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
             setError((res as any).error);
         } else {
             // Roteamento Inteligente:
-            // Se o carrinho estiver vazio, muito provavelmente o usuário clicou no menu "Perfil"
-            if (items.length === 0) {
+            if ((res as any).isAdmin) {
+                window.location.href = "/admin";
+            } else if (items.length === 0) {
+                // Se o carrinho estiver vazio, muito provavelmente o usuário clicou no menu "Perfil"
                 router.push("/profile");
             } else {
                 // Caso contrário (fazendo pedido), mantém na mesma tela
@@ -113,9 +142,13 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
         setLoading(true);
         setError(null);
 
+        const subtotal = totalPrice();
+        const deliveryFee = deliveryMethod === "ON_DELIVERY" ? (deliveryResult?.taxaEntrega || 0) : 0;
+        const total = subtotal + deliveryFee;
+
         const data = {
             items,
-            totalAmount: totalPrice(),
+            totalAmount: total,
             deliveryAddress: deliveryMethod === "ON_PICKUP" ? "RETIRADA NA LOJA" : address,
             customerName: profile?.name || user?.user_metadata?.name || "Cliente",
             customerPhone: profile?.phone || user?.user_metadata?.phone || "000000000",
@@ -311,20 +344,37 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
 
         const subtotal = totalPrice();
         const count = totalItems();
-        const deliveryFee = deliveryMethod === "ON_DELIVERY" ? storeSettings?.delivery_fee || 0 : 0;
+        const deliveryFee = deliveryMethod === "ON_DELIVERY" ? (deliveryResult?.taxaEntrega || 0) : 0;
         const total = subtotal + deliveryFee;
 
         return (
-            <div className="mx-auto w-full max-w-lg pt-[calc(env(safe-area-inset-top,0px)+24px)] px-4 pb-20">
-                {/* Header */}
-                <div className="flex items-center gap-4 mb-6">
-                    <button onClick={() => router.push("/cart")} className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all active:scale-90 shadow-sm">
-                        <ArrowLeft className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-                    </button>
-                    <h1 className="text-xl font-bold">Finalizar Pedido</h1>
-                </div>
+            <div className="w-full bg-gray-50 dark:bg-background min-h-screen pb-40">
+                {/* Header Padronizado e Full Width */}
+                <header className="sticky top-0 z-40 bg-surface shadow-sm border-b border-gray-100 dark:border-gray-800">
+                    <div className="mx-auto w-full max-w-lg px-4 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => router.push("/cart")}
+                                className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all shadow-sm"
+                            >
+                                <ArrowLeft className="h-5 w-5 text-foreground" />
+                            </motion.button>
+                            <h1 className="text-lg font-bold text-foreground">Finalizar Pedido</h1>
+                        </div>
 
-                <form onSubmit={handleCreateOrder} className="space-y-6">
+                        <button
+                            type="button"
+                            onClick={() => setShowClearCartModal(true)}
+                            className="text-[10px] font-black uppercase text-red-500 tracking-widest hover:bg-red-50 dark:hover:bg-red-950/20 px-3 py-2 rounded-lg transition-colors"
+                        >
+                            Limpar
+                        </button>
+                    </div>
+                </header>
+
+                <form onSubmit={handleCreateOrder} className="mx-auto w-full max-w-lg space-y-6 px-4 mt-6">
                     {/* Resumo do pedido Accordion */}
                     <div className="rounded-xl bg-surface shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-800 overflow-hidden">
                         <button
@@ -338,7 +388,7 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
                                 </div>
                                 <div className="text-left">
                                     <h2 className="text-sm font-black uppercase italic tracking-tighter text-foreground">Resumo do pedido</h2>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase">{count} {count === 1 ? 'item' : 'itens'}</p>
+                                    <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">{count} {count === 1 ? 'item' : 'itens'}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
@@ -361,31 +411,41 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
                                             return (
                                                 <div key={item.id} className="flex justify-between text-sm items-center">
                                                     <div className="flex flex-col">
-                                                        <span className="text-gray-900 dark:text-gray-100 font-bold text-xs">
+                                                        <span className="text-gray-800 dark:text-gray-200 font-bold text-xs">
                                                             {item.quantity}x {item.product.name}
                                                         </span>
                                                         {item.extras.length > 0 && (
-                                                            <span className="text-[9px] text-gray-400 font-medium uppercase italic">
+                                                            <span className="text-[10px] text-gray-500 font-bold uppercase italic">
                                                                 + {item.extras.map(e => e.name).join(', ')}
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <span className="font-black text-xs text-foreground tracking-tight">{fmt((item.product.price + extrasTotal) * item.quantity)}</span>
+                                                    <span className="font-black text-xs text-gray-800 dark:text-gray-200 tracking-tight">{fmt((item.product.price + extrasTotal) * item.quantity)}</span>
                                                 </div>
                                             );
                                         })}
 
                                         <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 space-y-2">
                                             <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider">
-                                                <span className="text-gray-400">Subtotal</span>
-                                                <span className="text-gray-500">{fmt(subtotal)}</span>
+                                                <span className="text-gray-800 dark:text-gray-200">Subtotal</span>
+                                                <span className="text-gray-800 dark:text-gray-200">{fmt(subtotal)}</span>
                                             </div>
                                             {deliveryMethod === "ON_DELIVERY" && (
                                                 <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider">
-                                                    <span className="text-gray-400">Taxa de entrega</span>
-                                                    <span className="text-emerald-500">{deliveryFee > 0 ? fmt(deliveryFee) : "Grátis"}</span>
+                                                    <span className="text-gray-800 dark:text-gray-200">Taxa de entrega</span>
+                                                    <span className={isCheckingArea || deliveryFee === 0 ? "text-emerald-500" : "text-gray-800 dark:text-gray-200"}>
+                                                        {isCheckingArea
+                                                            ? "..."
+                                                            : deliveryFee > 0
+                                                                ? fmt(deliveryFee)
+                                                                : "Grátis"}
+                                                    </span>
                                                 </div>
                                             )}
+                                            <div className="flex justify-between text-[13px] font-black uppercase tracking-wider mt-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+                                                <span className="text-gray-800 dark:text-gray-200">Total</span>
+                                                <span className="text-gray-800 dark:text-gray-200">{fmt(total)}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -403,12 +463,12 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
                                 className={cn(
                                     "p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all active:scale-95",
                                     deliveryMethod === "ON_DELIVERY"
-                                        ? "border-brand bg-transparent text-foreground shadow-sm"
-                                        : "border-gray-100 bg-surface dark:bg-gray-900 text-gray-400 opacity-60 hover:opacity-100"
+                                        ? "border-brand bg-brand/5 text-foreground shadow-sm"
+                                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-gray-300"
                                 )}
                             >
                                 <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center transition-colors shadow-sm",
-                                    deliveryMethod === "ON_DELIVERY" ? "bg-gray-100 dark:bg-gray-800 text-foreground" : "bg-gray-50 dark:bg-gray-900")}>
+                                    deliveryMethod === "ON_DELIVERY" ? "bg-brand/10 text-brand" : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400")}>
                                     <MapPin className={cn("h-5 w-5", deliveryMethod === "ON_DELIVERY" && "stroke-[2.5px]")} />
                                 </div>
                                 <span className="text-[10px] font-black uppercase tracking-widest italic">Entrega</span>
@@ -420,12 +480,12 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
                                 className={cn(
                                     "p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all active:scale-95",
                                     deliveryMethod === "ON_PICKUP"
-                                        ? "border-brand bg-transparent text-foreground shadow-sm"
-                                        : "border-gray-100 bg-surface dark:bg-gray-900 text-gray-400 opacity-60 hover:opacity-100"
+                                        ? "border-brand bg-brand/5 text-foreground shadow-sm"
+                                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-gray-300"
                                 )}
                             >
                                 <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center transition-colors shadow-sm",
-                                    deliveryMethod === "ON_PICKUP" ? "bg-gray-100 dark:bg-gray-800 text-foreground" : "bg-gray-50 dark:bg-gray-900")}>
+                                    deliveryMethod === "ON_PICKUP" ? "bg-brand/10 text-brand" : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400")}>
                                     <Navigation className={cn("h-5 w-5", deliveryMethod === "ON_PICKUP" && "stroke-[2.5px]")} />
                                 </div>
                                 <span className="text-[10px] font-black uppercase tracking-widest italic">Retirada</span>
@@ -446,33 +506,85 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
                                 </button>
                             </div>
 
-                            {address ? (
-                                <div className="p-5 rounded-xl bg-surface border border-gray-100 dark:border-gray-800 shadow-sm flex items-start gap-4 hover:border-brand/20 transition-colors group cursor-pointer" onClick={() => router.push("/profile/addresses")}>
-                                    <div className="h-10 w-10 min-w-[40px] rounded-xl bg-brand/5 flex items-center justify-center text-brand">
-                                        <MapPin className="h-5 w-5" />
+                            <div className="relative">
+                                {address ? (
+                                    <div
+                                        className="p-5 rounded-xl bg-surface border border-gray-100 dark:border-gray-800 shadow-sm flex items-start gap-4 hover:border-brand/20 transition-colors group cursor-pointer"
+                                        onClick={() => savedAddresses.length > 1 ? setIsAddressDropdownOpen(!isAddressDropdownOpen) : router.push("/profile/addresses")}
+                                    >
+                                        <div className="h-10 w-10 min-w-[40px] rounded-xl bg-brand/5 flex items-center justify-center text-brand">
+                                            <MapPin className="h-5 w-5" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold text-foreground leading-tight line-clamp-1">{address.split('.')[0]}</p>
+                                            <p className="text-[10px] font-black uppercase text-gray-400 mt-1 tracking-tight truncate">
+                                                {address.includes('.') ? address.split('.')[1] : ""}
+                                            </p>
+                                        </div>
+                                        {savedAddresses.length > 1 && (
+                                            <ChevronDown className={cn("h-4 w-4 text-gray-300 mt-3 group-hover:text-brand transition-transform", isAddressDropdownOpen && "rotate-180")} />
+                                        )}
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-bold text-foreground leading-tight line-clamp-1">{address.split('.')[0]}</p>
-                                        <p className="text-[10px] font-black uppercase text-gray-400 mt-1 tracking-tight truncate">
-                                            {address.includes('.') ? address.split('.')[1] : ""}
-                                        </p>
-                                    </div>
-                                    <ChevronDown className="h-4 w-4 text-gray-300 mt-3 group-hover:text-brand transition-colors" />
-                                </div>
-                            ) : (
-                                <button
-                                    type="button"
-                                    onClick={() => router.push("/profile/addresses")}
-                                    className="w-full p-8 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30 flex flex-col items-center gap-3 text-center transition-all hover:bg-gray-50 dark:hover:bg-gray-900/50"
-                                >
-                                    <div className="h-12 w-12 rounded-full bg-brand/10 flex items-center justify-center text-brand mb-1">
-                                        <Plus className="h-6 w-6" />
-                                    </div>
-                                    <p className="text-xs font-bold text-gray-500">Nenhum endereço selecionado.<br />Cadastre um agora para prosseguir.</p>
-                                </button>
-                            )}
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => router.push("/profile/addresses")}
+                                        className="w-full p-8 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30 flex flex-col items-center gap-3 text-center transition-all hover:bg-gray-50 dark:hover:bg-gray-900/50"
+                                    >
+                                        <div className="h-12 w-12 rounded-full bg-brand/10 flex items-center justify-center text-brand mb-1">
+                                            <Plus className="h-6 w-6" />
+                                        </div>
+                                        <p className="text-xs font-bold text-gray-500">Nenhum endereço selecionado.<br />Cadastre um agora para prosseguir.</p>
+                                    </button>
+                                )}
 
-                            {/* Alerta de Ãrea de Entrega (Visual Placeholder) */}
+                                <AnimatePresence>
+                                    {isAddressDropdownOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            className="absolute top-full left-0 right-0 mt-2 z-50 bg-surface border border-gray-100 dark:border-gray-800 rounded-xl shadow-2xl overflow-hidden"
+                                        >
+                                            <div className="max-h-60 overflow-y-auto">
+                                                {savedAddresses.map((addr: any) => (
+                                                    <div
+                                                        key={addr.id}
+                                                        onClick={() => {
+                                                            const addrStr = `${addr.street}, ${addr.number}${addr.complement ? ' - ' + addr.complement : ''}. ${addr.neighborhood}, ${addr.city}`;
+                                                            setAddress(addrStr);
+                                                            setSelectedAddressObj(addr);
+                                                            setIsAddressDropdownOpen(false);
+                                                        }}
+                                                        className={cn(
+                                                            "p-4 border-b border-gray-50 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-900 cursor-pointer flex items-center gap-3 transition-colors",
+                                                            selectedAddressObj?.id === addr.id && "bg-brand/5"
+                                                        )}
+                                                    >
+                                                        <MapPin className={cn("h-4 w-4 shrink-0", selectedAddressObj?.id === addr.id ? "text-brand" : "text-gray-400")} />
+                                                        <div className="min-w-0">
+                                                            <p className={cn("text-xs font-bold truncate", selectedAddressObj?.id === addr.id ? "text-foreground" : "text-gray-600")}>
+                                                                {addr.street}, {addr.number}
+                                                            </p>
+                                                            <p className="text-[10px] text-gray-400 uppercase font-bold truncate">
+                                                                {addr.neighborhood}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                <button
+                                                    onClick={() => router.push("/profile/addresses")}
+                                                    className="w-full p-4 text-center text-[10px] font-black uppercase text-brand tracking-widest hover:bg-brand/5 border-t border-gray-50 dark:border-gray-800"
+                                                >
+                                                    Gerenciar endereços
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            {/* Alerta de Endereço Validado */}
                             {deliveryMethod === "ON_DELIVERY" && address && (
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.95 }}
@@ -480,31 +592,36 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
                                     className={cn(
                                         "p-4 rounded-xl border flex gap-3 transition-colors",
                                         isCheckingArea ? "bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800" :
-                                            isOutsideArea ? "bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/30" :
-                                                "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30"
+                                            "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30"
                                     )}
                                 >
                                     {isCheckingArea ? (
                                         <Loader2 className="h-5 w-5 text-gray-400 animate-spin shrink-0" />
-                                    ) : isOutsideArea ? (
-                                        <AlertTriangle className="h-5 w-5 text-red-500 shrink-0" />
                                     ) : (
                                         <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
                                     )}
                                     <div className="space-y-1">
                                         <p className={cn(
                                             "text-[10px] font-black uppercase tracking-wider leading-none mt-1",
-                                            isCheckingArea ? "text-gray-400" : isOutsideArea ? "text-red-600" : "text-emerald-600"
+                                            isCheckingArea ? "text-gray-400" : "text-emerald-600"
                                         )}>
-                                            {isCheckingArea ? "Validando distância..." : isOutsideArea ? "Fora da área de entrega!" : "Endereço dentro do raio."}
+                                            {isCheckingArea ? "Buscando taxa..." : "Endereço verificado"}
                                         </p>
                                         <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 tracking-tight leading-tight">
-                                            {isCheckingArea ? "Consultando serviços de localização..." :
-                                                isOutsideArea ? `Desculpe, atendemos apenas até ${storeSettings?.delivery_radius || 5}km.` :
-                                                    "Sua entrega será priorizada por nossa logística."}
+                                            {isCheckingArea ? "Consultando serviços de entrega..." :
+                                                `Taxa de entrega computada. Tempo estimado de ${deliveryResult?.tempoEstimadoMin} minutos.`}
                                         </p>
                                     </div>
                                 </motion.div>
+                            )}
+
+                            {deliveryResult?.pedidoMinimo && totalPrice() < deliveryResult.pedidoMinimo && (
+                                <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 rounded-xl flex items-center gap-2">
+                                    <AlertTriangle className="h-4 w-4 text-amber-500" />
+                                    <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-tighter">
+                                        Pedido mín. para sua região: {fmt(deliveryResult.pedidoMinimo)} (Faltam {fmt(deliveryResult.pedidoMinimo - totalPrice())})
+                                    </p>
+                                </div>
                             )}
 
                             {/* Hidden Input for Form Submission if needed, but we handle in handleCreateOrder */}
@@ -570,41 +687,6 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
                     <div className="space-y-4">
                         <h2 className="font-bold text-foreground">Forma de Pagamento</h2>
                         <div className="grid grid-cols-4 gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setPaymentMethod("PIX")}
-                                className={cn(
-                                    "py-3 px-1 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all active:scale-95",
-                                    paymentMethod === "PIX"
-                                        ? "border-brand bg-transparent text-foreground shadow-sm"
-                                        : "border-gray-50 bg-surface dark:bg-gray-900 text-gray-400 opacity-60 hover:opacity-100"
-                                )}
-                            >
-                                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center transition-colors shadow-sm",
-                                    paymentMethod === "PIX" ? "bg-gray-100 dark:bg-gray-800 text-foreground" : "bg-gray-50 dark:bg-gray-900")}>
-                                    <QrCode className={cn("h-4 w-4", paymentMethod === "PIX" && "stroke-[2.5px]")} />
-                                </div>
-                                <span className="text-[9px] font-black uppercase tracking-tight italic">PIX</span>
-                            </button>
-
-                            {/* DINHEIRO */}
-                            <button
-                                type="button"
-                                onClick={() => setPaymentMethod("DINHEIRO")}
-                                className={cn(
-                                    "py-3 px-1 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all active:scale-95",
-                                    paymentMethod === "DINHEIRO"
-                                        ? "border-brand bg-transparent text-foreground shadow-sm"
-                                        : "border-gray-50 bg-surface dark:bg-gray-900 text-gray-400 opacity-60 hover:opacity-100"
-                                )}
-                            >
-                                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center transition-colors shadow-sm",
-                                    paymentMethod === "DINHEIRO" ? "bg-gray-100 dark:bg-gray-800 text-foreground" : "bg-gray-50 dark:bg-gray-900")}>
-                                    <Banknote className={cn("h-4 w-4", paymentMethod === "DINHEIRO" && "stroke-[2.5px]")} />
-                                </div>
-                                <span className="text-[9px] font-black uppercase tracking-tight italic">Dinheiro</span>
-                            </button>
-
                             {/* CREDITO */}
                             <button
                                 type="button"
@@ -612,12 +694,12 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
                                 className={cn(
                                     "py-3 px-1 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all active:scale-95",
                                     paymentMethod === "CREDITO"
-                                        ? "border-brand bg-transparent text-foreground shadow-sm"
-                                        : "border-gray-50 bg-surface dark:bg-gray-900 text-gray-400 opacity-60 hover:opacity-100"
+                                        ? "border-brand bg-brand/5 text-foreground shadow-sm"
+                                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-gray-300"
                                 )}
                             >
                                 <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center transition-colors shadow-sm",
-                                    paymentMethod === "CREDITO" ? "bg-gray-100 dark:bg-gray-800 text-foreground" : "bg-gray-50 dark:bg-gray-900")}>
+                                    paymentMethod === "CREDITO" ? "bg-gray-100 dark:bg-gray-800 text-foreground" : "bg-gray-50 dark:bg-gray-900 text-gray-500")}>
                                     <CreditCard className={cn("h-4 w-4", paymentMethod === "CREDITO" && "stroke-[2.5px]")} />
                                 </div>
                                 <span className="text-[9px] font-black uppercase tracking-tight italic">Crédito</span>
@@ -630,15 +712,51 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
                                 className={cn(
                                     "py-3 px-1 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all active:scale-95",
                                     paymentMethod === "DEBITO"
-                                        ? "border-brand bg-transparent text-foreground shadow-sm"
-                                        : "border-gray-50 bg-surface dark:bg-gray-900 text-gray-400 opacity-60 hover:opacity-100"
+                                        ? "border-brand bg-brand/5 text-foreground shadow-sm"
+                                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-gray-300"
                                 )}
                             >
                                 <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center transition-colors shadow-sm",
-                                    paymentMethod === "DEBITO" ? "bg-gray-100 dark:bg-gray-800 text-foreground" : "bg-gray-50 dark:bg-gray-900")}>
+                                    paymentMethod === "DEBITO" ? "bg-gray-100 dark:bg-gray-800 text-foreground" : "bg-gray-50 dark:bg-gray-900 text-gray-500")}>
                                     <CreditCard className={cn("h-4 w-4", paymentMethod === "DEBITO" && "stroke-[2.5px]")} />
                                 </div>
                                 <span className="text-[9px] font-black uppercase tracking-tight italic">Débito</span>
+                            </button>
+
+                            {/* PIX */}
+                            <button
+                                type="button"
+                                onClick={() => setPaymentMethod("PIX")}
+                                className={cn(
+                                    "py-3 px-1 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all active:scale-95",
+                                    paymentMethod === "PIX"
+                                        ? "border-brand bg-brand/5 text-foreground shadow-sm"
+                                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-gray-300"
+                                )}
+                            >
+                                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center transition-colors shadow-sm",
+                                    paymentMethod === "PIX" ? "bg-gray-100 dark:bg-gray-800 text-foreground" : "bg-gray-50 dark:bg-gray-900 text-gray-500")}>
+                                    <QrCode className={cn("h-4 w-4", paymentMethod === "PIX" && "stroke-[2.5px]")} />
+                                </div>
+                                <span className="text-[9px] font-black uppercase tracking-tight italic">PIX</span>
+                            </button>
+
+                            {/* DINHEIRO */}
+                            <button
+                                type="button"
+                                onClick={() => setPaymentMethod("DINHEIRO")}
+                                className={cn(
+                                    "py-3 px-1 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all active:scale-95",
+                                    paymentMethod === "DINHEIRO"
+                                        ? "border-brand bg-brand/5 text-foreground shadow-sm"
+                                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-gray-300"
+                                )}
+                            >
+                                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center transition-colors shadow-sm",
+                                    paymentMethod === "DINHEIRO" ? "bg-gray-100 dark:bg-gray-800 text-foreground" : "bg-gray-50 dark:bg-gray-900 text-gray-500")}>
+                                    <Banknote className={cn("h-4 w-4", paymentMethod === "DINHEIRO" && "stroke-[2.5px]")} />
+                                </div>
+                                <span className="text-[9px] font-black uppercase tracking-tight italic">Dinheiro</span>
                             </button>
                         </div>
 
@@ -676,20 +794,28 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
                                 <Info className="h-4 w-4" />
                             </div>
                             <p className="text-[11px] font-bold text-gray-500 leading-relaxed uppercase tracking-tighter">
-                                O pagamento será realizado no momento da <span className="text-brand italic">{deliveryMethod === 'ON_DELIVERY' ? 'entrega' : 'retirada'}</span>.
-                                {paymentMethod === 'PIX' && ' Mostraremos a chave dinâmica no fim do pedido.'}
+                                {paymentMethod === 'PIX' ? (
+                                    <>O PAGAMENTO POR PIX SÓ É ACEITO ATRAVÉS DA NOSSA <span className="text-brand italic">MÁQUINA</span>, NÃO ACEITE PAGAR POR OUTRA CHAVE.</>
+                                ) : (
+                                    <>O PAGAMENTO SERÁ REALIZADO NO MOMENTO DA <span className="text-brand italic">{deliveryMethod === 'ON_DELIVERY' ? 'ENTREGA' : 'RETIRADA'}</span>.</>
+                                )}
                             </p>
                         </div>
                     </div>
 
-                    {error && <p className="text-sm text-red-500 font-bold text-center">{error}</p>}
+                    {error && (
+                        <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 flex items-start gap-3">
+                            <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+                            <p className="text-sm text-red-700 dark:text-red-300 font-semibold">{error}</p>
+                        </div>
+                    )}
 
-                    {/* Static Premium Footer */}
-                    <div className="mt-2 pt-4 pb-8">
-                        <div className="rounded-xl bg-surface border border-gray-100 dark:border-gray-800 shadow-[0_10px_30px_rgba(0,0,0,0.05)] overflow-hidden">
-                            <div className="flex items-center justify-between p-5">
+                    {/* Fixed Premium Footer */}
+                    <div className="fixed bottom-0 left-0 right-0 z-40 bg-surface border-t border-gray-100 dark:border-gray-800 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)]">
+                        <div className="mx-auto w-full max-w-lg px-4">
+                            <div className="flex items-center justify-between">
                                 <div className="flex flex-col">
-                                    <span className="text-[9px] font-black uppercase text-gray-400 tracking-[0.2em] leading-none mb-1 opacity-70 italic">Checkout Total</span>
+                                    <span className="text-[9px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-[0.2em] leading-none mb-1 italic">Checkout Total</span>
                                     <div className="flex items-baseline gap-2">
                                         <span className="text-2xl font-black text-foreground tracking-tighter">{fmt(total)}</span>
                                         <span className="text-[10px] text-brand font-black uppercase italic tracking-tight">{count} UN</span>
@@ -699,10 +825,10 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
                                 <motion.button
                                     whileTap={{ scale: 0.95 }}
                                     type="submit"
-                                    disabled={loading || (deliveryMethod === "ON_DELIVERY" && (!address || isOutsideArea)) || !isStoreOpen}
+                                    disabled={loading || (deliveryMethod === "ON_DELIVERY" && (!address || (deliveryResult?.pedidoMinimo && totalPrice() < deliveryResult.pedidoMinimo))) || !isStoreOpen}
                                     className={cn(
                                         "relative h-14 px-10 rounded-xl font-black text-[13px] uppercase italic tracking-widest transition-all shadow-xl overflow-hidden group",
-                                        loading || (deliveryMethod === "ON_DELIVERY" && (!address || isOutsideArea)) || !isStoreOpen
+                                        loading || (deliveryMethod === "ON_DELIVERY" && (!address || (deliveryResult?.pedidoMinimo && totalPrice() < deliveryResult.pedidoMinimo))) || !isStoreOpen
                                             ? "bg-gray-100 text-gray-400 cursor-not-allowed shadow-none"
                                             : "bg-brand text-white shadow-brand/30 hover:brightness-110 active:shadow-none"
                                     )}
@@ -726,6 +852,59 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
     return (
         <>
             {user ? renderOrderForm() : renderAuthForm()}
+
+            {/* Clear Cart Confirmation Modal */}
+            <AnimatePresence>
+                {showClearCartModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowClearCartModal(false)}
+                            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+                        />
+
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-xl p-8 text-center shadow-2xl border border-gray-100 dark:border-gray-800"
+                        >
+                            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/30 text-red-500 shadow-inner">
+                                <AlertTriangle className="h-10 w-10" />
+                            </div>
+
+                            <h2 className="text-2xl font-black text-foreground italic uppercase tracking-tighter leading-tight mb-3">
+                                Limpar Carrinho?
+                            </h2>
+
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-8 px-2">
+                                Todos os itens serão removidos e você voltará para o cardápio. Deseja continuar?
+                            </p>
+
+                            <div className="space-y-3">
+                                <Button
+                                    onClick={() => {
+                                        clearCart();
+                                        router.push("/");
+                                    }}
+                                    className="w-full h-14 rounded-xl bg-red-500 text-white font-black uppercase italic tracking-widest shadow-lg shadow-red-500/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                >
+                                    Sim, Limpar Tudo
+                                </Button>
+
+                                <button
+                                    onClick={() => setShowClearCartModal(false)}
+                                    className="w-full h-12 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-foreground transition-all"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Success Modal */}
             <AnimatePresence>
@@ -756,34 +935,19 @@ export function CheckoutView({ user, profile, savedAddresses = [], storeSettings
                             </div>
 
                             <h2 className="text-2xl font-black text-foreground italic uppercase tracking-tighter leading-tight mb-3">
-                                {paymentMethod === 'PIX' ? "Quase lá!" : "Pedido Realizado!"}
+                                Pedido Realizado!
                             </h2>
 
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-6 px-2">
-                                {paymentMethod === 'PIX'
-                                    ? "Finalize o pagamento com a chave PIX abaixo para iniciarmos a preparação."
-                                    : "Seu pedido foi confirmado e já está sendo preparado pela nossa cozinha."}
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-8 px-2">
+                                Seu pedido foi recebido com sucesso e nossa equipe já foi notificada. Muito obrigado pela sua preferência!
                             </p>
-
-                            {paymentMethod === 'PIX' && (
-                                <div className="mb-8 p-6 rounded-xl bg-brand/5 border border-brand/10 space-y-4">
-                                    <div className="flex flex-col items-center gap-2">
-                                        <span className="text-[10px] font-black uppercase text-brand tracking-widest leading-none">Chave PIX (E-mail)</span>
-                                        <p className="text-sm font-black text-foreground select-all bg-white dark:bg-black px-4 py-2 rounded-xl border border-brand/20 shadow-sm">
-                                            pagamentos@rdos.com.br
-                                        </p>
-                                    </div>
-                                    <div className="pt-2">
-                                        <p className="text-[9px] font-bold text-gray-400 uppercase leading-relaxed italic border-t border-brand/10 pt-4">
-                                            Após o pagamento, o sistema detectará o recebimento e enviará para a cozinha automaticamente.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
 
                             <div className="space-y-3">
                                 <Button
-                                    onClick={() => router.push(`/order/${orderId}`)}
+                                    onClick={async () => {
+                                        await requestPermissionAndSubscribe();
+                                        router.push(`/order/${orderId}`);
+                                    }}
                                     className="w-full h-14 rounded-xl bg-brand text-white font-black uppercase italic tracking-widest shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 transition-all"
                                 >
                                     Acompanhar Pedido

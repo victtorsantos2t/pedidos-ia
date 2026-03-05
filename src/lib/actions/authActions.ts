@@ -8,7 +8,7 @@ export async function login(formData: FormData) {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
     });
@@ -16,8 +16,21 @@ export async function login(formData: FormData) {
     if (error) {
         return { error: error.message };
     }
+
+    let isAdmin = false;
+    if (authData?.user) {
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("is_admin")
+            .eq("id", authData.user.id)
+            .single();
+        if (profile?.is_admin) {
+            isAdmin = true;
+        }
+    }
+
     revalidatePath("/", "layout");
-    return { success: true };
+    return { success: true, isAdmin };
 }
 
 export async function signup(formData: FormData) {

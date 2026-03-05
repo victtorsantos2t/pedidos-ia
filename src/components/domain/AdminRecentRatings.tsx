@@ -133,7 +133,7 @@ export function AdminRecentRatings() {
                         {/* Content */}
                         {rating.comment && (
                             <p className="text-sm text-[#2A2A2A] dark:text-gray-300 italic font-medium leading-relaxed mb-4">
-                                "{rating.comment}"
+                                &quot;{rating.comment}&quot;
                             </p>
                         )}
 
@@ -163,7 +163,7 @@ export function AdminRecentRatings() {
                                     <span className="text-[9px] font-black uppercase text-[#FA0000] tracking-widest italic">Resposta da Loja</span>
                                 </div>
                                 <p className="text-xs text-gray-600 dark:text-gray-400 font-bold italic">
-                                    "{rating.store_response}"
+                                    &quot;{rating.store_response}&quot;
                                 </p>
                             </div>
                         ) : (

@@ -115,15 +115,8 @@ export function CatalogView({ categories, products, isStoreOpen = true, storeSet
 
     return (
         <div className="min-h-screen bg-background pb-32">
-            {/* Sticky Branding Header - Glassmorphism */}
-            <header
-                className={cn(
-                    "fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-[var(--ease-out)] px-5",
-                    scrolled
-                        ? "bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 py-3 h-[64px]"
-                        : "bg-transparent py-6 pt-[calc(env(safe-area-inset-top,0px)+24px)] h-[120px]"
-                )}
-            >
+            {/* Branding Header - Agora rolável com a página */}
+            <header className="bg-transparent py-8 pt-[calc(env(safe-area-inset-top,0px)+24px)] px-5">
                 <div className="max-w-lg mx-auto flex items-center justify-between">
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
@@ -132,16 +125,7 @@ export function CatalogView({ categories, products, isStoreOpen = true, storeSet
                         onClick={() => window.location.href = "/ratings"}
                     >
                         {/* Logo Circular com Borda Brand */}
-                        <motion.div
-                            animate={{
-                                width: scrolled ? 32 : 44,
-                                height: scrolled ? 32 : 44
-                            }}
-                            className={cn(
-                                "relative rounded-full border-2 border-brand p-0.5 bg-white overflow-hidden shadow-sm transition-all duration-300",
-                                scrolled ? "h-8 w-8" : "h-11 w-11"
-                            )}
-                        >
+                        <div className="relative rounded-full border-2 border-brand p-0.5 bg-white overflow-hidden shadow-sm h-11 w-11">
                             {storeSettings?.logo_url ? (
                                 <Image src={storeSettings.logo_url} alt="Logo" fill className="object-cover rounded-full" />
                             ) : (
@@ -149,14 +133,11 @@ export function CatalogView({ categories, products, isStoreOpen = true, storeSet
                                     <span className="text-white font-black text-xs">{storeSettings?.store_name?.charAt(0) || "S"}</span>
                                 </div>
                             )}
-                        </motion.div>
+                        </div>
 
-                        {/* Nome da loja — text-display (20px/600) + text-primary */}
+                        {/* Nome da loja */}
                         <div className="flex flex-col">
-                            <h1 className={cn(
-                                "font-black tracking-tighter leading-none transition-all duration-300 text-color-primary",
-                                scrolled ? "text-base" : "text-display"
-                            )}>
+                            <h1 className="font-black tracking-tighter leading-none text-color-primary text-display">
                                 {storeSettings?.store_name || "SMASH GOURMET"}
                             </h1>
                             <div className="flex items-center gap-2 mt-0.5">
@@ -183,25 +164,17 @@ export function CatalogView({ categories, products, isStoreOpen = true, storeSet
                         </div>
                     </motion.div>
 
-                    <div className="flex items-center gap-3">
-                        <UserButton />
-                    </div>
+                    <Link
+                        href="/ratings"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors text-brand"
+                    >
+                        <Plus className="h-3.5 w-3.5" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-color-primary">Informações</span>
+                    </Link>
                 </div>
             </header>
 
-            {/* Espaçador para o Header Fixed */}
-            <div className="h-[120px]" />
-
-            <motion.div
-                animate={{
-                    opacity: scrolled ? 0 : 1,
-                    y: scrolled ? -20 : 0,
-                    height: scrolled ? 0 : "auto",
-                    marginBottom: scrolled ? 0 : 32
-                }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className={cn("px-5 overflow-hidden", scrolled && "pointer-events-none")}
-            >
+            <div className="px-5 mb-8">
                 <div className="max-w-lg mx-auto relative group">
                     <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                         <Search className="h-5 w-5 text-gray-400 group-focus-within:text-brand transition-colors" />
@@ -214,7 +187,7 @@ export function CatalogView({ categories, products, isStoreOpen = true, storeSet
                         className="w-full bg-gray-100 dark:bg-gray-900 border-none h-14 pl-12 pr-4 rounded-xl text-sm font-medium focus:ring-2 focus:ring-brand/20 transition-all shadow-sm"
                     />
                 </div>
-            </motion.div>
+            </div>
 
             {
                 !isStoreOpen && (
@@ -231,53 +204,7 @@ export function CatalogView({ categories, products, isStoreOpen = true, storeSet
             }
 
             {isStoreOpen && storeSettings && (
-                <motion.div
-                    animate={{
-                        opacity: scrolled ? 0 : 1,
-                        height: scrolled ? 0 : "auto",
-                        marginTop: scrolled ? 0 : 4
-                    }}
-                    className={cn("overflow-hidden", scrolled && "pointer-events-none")}
-                >
-                    <div
-                        className="bg-surface border-b border-gray-100 dark:border-gray-800 px-5 py-3 flex items-center justify-center gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
-                        onClick={() => window.location.href = "/ratings"}
-                    >
-                        <div className="flex items-center gap-2 shrink-0">
-                            <div className="bg-orange-50 dark:bg-orange-950 px-2 py-1.5 rounded-lg flex items-center gap-2 border border-orange-100/50 dark:border-orange-800/30">
-                                <Clock className="h-4 w-4 text-orange-600" />
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] font-black uppercase text-orange-400 leading-none">Entrega</span>
-                                    <span className="text-xs font-black text-orange-800 dark:text-orange-200 tracking-tight italic uppercase">{storeSettings.estimated_time || "30-45 min"}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                            <div className="bg-brand/5 px-2 py-1.5 rounded-lg flex items-center gap-2 border border-brand/10">
-                                <Wallet className="h-4 w-4 text-brand" />
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] font-black uppercase text-brand/50 leading-none">Mínimo</span>
-                                    <span className="text-xs font-black text-brand tracking-tight italic uppercase">
-                                        {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(storeSettings.min_order_value || 0)}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                            <div className="bg-blue-50 dark:bg-blue-950 px-2 py-1.5 rounded-lg flex items-center gap-2 border border-blue-100/50 dark:border-blue-800/30">
-                                <Bike className="h-4 w-4 text-blue-600" />
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] font-black uppercase text-blue-400 leading-none">Taxa</span>
-                                    <span className="text-xs font-black text-blue-800 dark:text-blue-200 tracking-tight italic uppercase">
-                                        {storeSettings.delivery_fee > 0 ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(storeSettings.delivery_fee) : "Grátis"}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
+                <div className="mb-1" />
             )}
 
             {
@@ -286,7 +213,6 @@ export function CatalogView({ categories, products, isStoreOpen = true, storeSet
                         categories={categories}
                         activeCategoryId={activeCategory}
                         onSelect={handleSelectCategory}
-                        scrolled={scrolled}
                     />
                 )
             }
@@ -334,28 +260,19 @@ export function CatalogView({ categories, products, isStoreOpen = true, storeSet
                 {/* Seção Mais Pedidos */}
                 {!searchQuery && products.length > 0 && (
                     <div className="space-y-6">
-                        <div className="flex items-center gap-2.5 px-1">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-600 shadow-sm">
-                                <TrendingUp className="h-5 w-5" />
-                            </div>
-                            <div>
-                                {/* Mais Pedidos — text-display + text-primary */}
-                                <h2 className="text-display font-black text-color-primary uppercase italic tracking-tighter">Mais Pedidos</h2>
-                                {/* Subtítulo — text-label (12px) + text-tertiary */}
-                                <p className="text-label-sm text-color-tertiary font-bold uppercase tracking-widest mt-0.5">Os queridinhos da casa</p>
-                            </div>
+                        <div className="px-1">
+                            <h2 className="text-xl font-bold text-color-primary tracking-tight">Destaques</h2>
                         </div>
 
-                        <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-5 px-5 scroll-smooth">
-                            {products.slice(0, 7).map((product) => (
-                                <div key={`top-${product.id}`} className="shrink-0">
-                                    <ProductCard
-                                        product={product}
-                                        onAdd={(p) => isStoreOpen && setSelectedProduct(p)}
-                                        isStoreOpen={isStoreOpen}
-                                        isCompact={true}
-                                    />
-                                </div>
+                        <div className="grid grid-cols-3 gap-x-4 gap-y-8 px-1">
+                            {products.slice(0, 6).map((product) => (
+                                <ProductCard
+                                    key={`top-${product.id}`}
+                                    product={product}
+                                    onAdd={(p) => isStoreOpen && setSelectedProduct(p)}
+                                    isStoreOpen={isStoreOpen}
+                                    isFeatured={true}
+                                />
                             ))}
                         </div>
                     </div>
@@ -407,7 +324,7 @@ export function CatalogView({ categories, products, isStoreOpen = true, storeSet
                         <h3 className="text-title font-bold text-color-primary">Nada encontrado</h3>
                         {/* Descrição — text-body + text-secondary */}
                         <p className="text-body-content max-w-xs mt-2">
-                            Não encontramos nenhum item chamado "{searchQuery}". Tente outro nome ou navegue pelas categorias.
+                            Não encontramos nenhum item chamado &quot;{searchQuery}&quot;. Tente outro nome ou navegue pelas categorias.
                         </p>
                     </div>
                 )}

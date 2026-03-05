@@ -1,5 +1,3 @@
-import { getDeliveryZones } from "./delivery.repository";
-import { calculateDistance, computeDeliveryFee, calculateEstimatedTime } from "./delivery.calculator";
 import { DeliveryCalculationResult } from "./delivery.types";
 import { obterConfiguracoesLoja } from "@/lib/actions/adminSettingsActions";
 
@@ -13,65 +11,25 @@ export async function calculateDelivery({
     orderValue: number;
 }): Promise<DeliveryCalculationResult> {
     try {
-        // 1. Obter configurações da loja (coordenadas de origem)
-        // Nota: Como não temos coordenadas da loja no store_config ainda, 
-        // assumiremos uma coordenada central padrão ou precisaremos adicionar ao banco.
-        // Por enquanto, usaremos uma constante baseada no pickup_address ou um placeholder.
-        // TODO: Adicionar store_lat e store_lng ao store_config.
         const config = await obterConfiguracoesLoja();
 
-        // Coordenadas mock para o restaurante (Exemplo: Centro de São Paulo)
-        // Em produção, isso deve vir do store_config
-        const STORE_LAT = -23.5505;
-        const STORE_LNG = -46.6333;
+        const taxaFixa = config?.delivery_fee || 0;
+        const pedidoMinimo = config?.min_order_value || 0;
 
-        // 2. Calcular distância via Haversine
-        const distance = calculateDistance(STORE_LAT, STORE_LNG, userLat, userLng);
-
-        // 3. Segurança: Limitar distância máxima (requisito UX)
-        if (distance > 12) {
-            return {
-                zona: "Fora da Área",
-                distancia: distance,
-                taxaEntrega: 0,
-                freteGratis: false,
-                pedidoMinimo: 0,
-                tempoEstimadoMin: 0,
-                error: "Desculpe, seu endereço está fora da nossa área de entrega (máx 12km).",
-            };
+        // Conversão de estimated_time (ex "40-50 min") para número inteiro aproximado 
+        let tempoEstimado = 40;
+        if (config?.estimated_time) {
+            const match = config.estimated_time.match(/\d+/);
+            if (match) tempoEstimado = parseInt(match[0], 10);
         }
-
-        // 4. Encontrar zona correspondente
-        const zones = await getDeliveryZones();
-        const zone = zones.find(
-            (z) => distance >= z.raio_min_km && distance <= z.raio_max_km
-        );
-
-        if (!zone) {
-            return {
-                zona: "Área não coberta",
-                distancia: distance,
-                taxaEntrega: 0,
-                freteGratis: false,
-                pedidoMinimo: 0,
-                tempoEstimadoMin: 0,
-                error: "Infelizmente ainda não entregamos nesta distância.",
-            };
-        }
-
-        // 5. Aplicar cálculo de taxa
-        const { fee, isFree } = computeDeliveryFee(distance, zone, orderValue);
-
-        // 6. Tempo estimado
-        const estimatedTime = calculateEstimatedTime(distance);
 
         return {
-            zona: zone.nome,
-            distancia: Number(distance.toFixed(2)),
-            taxaEntrega: Number(fee.toFixed(2)),
-            freteGratis: isFree,
-            pedidoMinimo: zone.pedido_minimo,
-            tempoEstimadoMin: estimatedTime,
+            zona: "Taxa Fixa Padrão",
+            distancia: 0, // Ignoramos a distância e zonas geográficas
+            taxaEntrega: taxaFixa,
+            freteGratis: taxaFixa === 0,
+            pedidoMinimo: pedidoMinimo,
+            tempoEstimadoMin: tempoEstimado,
         };
     } catch (error) {
         console.error("[DeliveryService] Error in calculation:", error);

@@ -4,23 +4,28 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { Product } from "@/lib/services/catalogService";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Heart, Star, ShoppingBag, ChevronRight, Minus, Plus } from "lucide-react";
-import { useCartStore } from "@/store/cartStore";
+import { useCartStore, CartItem } from "@/store/cartStore";
+import { useFavoritesStore } from "@/store/favoritesStore";
 import { Textarea } from "@/components/core/Textarea";
 import { cn } from "@/lib/utils";
 
 interface ProductDrawerProps {
     product: Product | null;
+    editingItem?: CartItem | null;
     onClose: () => void;
     isStoreOpen?: boolean;
 }
 
-export function ProductDrawer({ product, onClose, isStoreOpen = true }: ProductDrawerProps) {
-    const addItem = useCartStore((state) => state.addItem);
+export function ProductDrawer({ product, editingItem, onClose, isStoreOpen = true }: ProductDrawerProps) {
+    const { addItem, updateItem } = useCartStore();
+    const { toggleFavorite, isFavorite } = useFavoritesStore();
     const [quantity, setQuantity] = useState(1);
     const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
     const [notes, setNotes] = useState("");
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
     const [imageError, setImageError] = useState(false);
+
+    const favorited = useMemo(() => product ? isFavorite(product.id) : false, [product, isFavorite]);
 
     // Bloqueio de scroll do body
     useEffect(() => {
@@ -35,13 +40,18 @@ export function ProductDrawer({ product, onClose, isStoreOpen = true }: ProductD
 
     // Reset de estados
     useEffect(() => {
-        if (product) {
+        if (editingItem) {
+            setQuantity(editingItem.quantity);
+            setSelectedExtras(editingItem.extras.map(e => e.id));
+            setNotes(editingItem.notes);
+            setIsDescriptionExpanded(false);
+        } else if (product) {
             setQuantity(1);
             setSelectedExtras([]);
             setNotes("");
             setIsDescriptionExpanded(false);
         }
-    }, [product]);
+    }, [product, editingItem]);
 
     const handleToggleExtra = useCallback((extraId: string) => {
         setSelectedExtras((prev) =>
@@ -53,9 +63,14 @@ export function ProductDrawer({ product, onClose, isStoreOpen = true }: ProductD
         if (!product) return;
         const extrasList = product.product_extras || [];
         const chosenExtras = extrasList.filter((e) => selectedExtras.includes(e.id));
-        addItem(product, quantity, chosenExtras, notes);
+
+        if (editingItem) {
+            updateItem(editingItem.id, quantity, chosenExtras, notes);
+        } else {
+            addItem(product, quantity, chosenExtras, notes);
+        }
         onClose();
-    }, [product, quantity, selectedExtras, notes, addItem, onClose]);
+    }, [product, quantity, selectedExtras, notes, addItem, updateItem, editingItem, onClose]);
 
     const extrasList = useMemo(() => product?.product_extras || [], [product]);
 
@@ -99,8 +114,16 @@ export function ProductDrawer({ product, onClose, isStoreOpen = true }: ProductD
                             >
                                 <ArrowLeft className="h-6 w-6" />
                             </button>
-                            <button className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-300 shadow-md hover:text-[#FA0000] transition-all active:scale-90 border border-gray-100 dark:border-gray-800">
-                                <Heart className="h-5 w-5" />
+                            <button
+                                onClick={() => toggleFavorite(product.id)}
+                                className={cn(
+                                    "pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full shadow-md transition-all active:scale-90 border",
+                                    favorited
+                                        ? "bg-brand text-white border-brand"
+                                        : "bg-white text-gray-300 border-gray-100 dark:border-gray-800"
+                                )}
+                            >
+                                <Heart className={cn("h-5 w-5", favorited && "fill-current")} />
                             </button>
                         </div>
 
@@ -141,17 +164,7 @@ export function ProductDrawer({ product, onClose, isStoreOpen = true }: ProductD
                                         </div>
                                     </div>
 
-                                    {/* Evaluation Row */}
-                                    <div className="flex items-center justify-between py-3.5 border-y border-gray-100 dark:border-gray-900/50">
-                                        <div className="flex items-center gap-2">
-                                            <Star className="h-4 w-4 fill-[#FA0000] text-[#FA0000]" />
-                                            <span className="text-sm font-black text-gray-900 dark:text-white">4.9</span>
-                                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-0.5">(1.205)</span>
-                                        </div>
-                                        <button className="text-[10px] font-black text-gray-500 uppercase tracking-widest underline decoration-gray-100 dark:decoration-gray-800 underline-offset-4">
-                                            Ver avaliações
-                                        </button>
-                                    </div>
+
 
                                     {/* Description */}
                                     {product.description && (
@@ -162,13 +175,15 @@ export function ProductDrawer({ product, onClose, isStoreOpen = true }: ProductD
                                             )}>
                                                 {product.description}
                                             </p>
-                                            <button
-                                                onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                                                className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-1"
-                                            >
-                                                {isDescriptionExpanded ? "Ver menos" : "Ver mais"}
-                                                <ChevronRight className={cn("h-3 w-3 transition-transform", isDescriptionExpanded && "rotate-90")} />
-                                            </button>
+                                            {product.description.length > 100 && (
+                                                <button
+                                                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                                                    className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-1 mt-1"
+                                                >
+                                                    {isDescriptionExpanded ? "Ver menos" : "Ver mais"}
+                                                    <ChevronRight className={cn("h-3 w-3 transition-transform", isDescriptionExpanded && "rotate-90")} />
+                                                </button>
+                                            )}
                                         </div>
                                     )}
 
@@ -255,8 +270,12 @@ export function ProductDrawer({ product, onClose, isStoreOpen = true }: ProductD
                                         !isStoreOpen && "grayscale opacity-50 cursor-not-allowed"
                                     )}
                                 >
-                                    <ShoppingBag className="h-4 w-4" />
-                                    <span className="text-[11px] font-black uppercase italic tracking-widest leading-none">Adicionar</span>
+                                    <ShoppingBag className="h-4 w-4 shrink-0 sm:block hidden lg:block" />
+                                    <span className="flex items-center justify-center w-full gap-1.5 text-[10px] sm:text-[11px] font-black uppercase italic tracking-widest leading-none whitespace-nowrap overflow-hidden">
+                                        <span className="truncate">{editingItem ? "Atualizar" : "Adicionar"}</span>
+                                        <span className="opacity-50 text-[10px] shrink-0">•</span>
+                                        <span className="shrink-0">{new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(finalPrice)}</span>
+                                    </span>
                                 </button>
                             </div>
                         </div>

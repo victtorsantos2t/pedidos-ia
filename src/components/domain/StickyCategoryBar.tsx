@@ -3,6 +3,7 @@
 import { Category } from "@/lib/services/catalogService";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 interface StickyCategoryBarProps {
     categories: Category[];
@@ -17,41 +18,62 @@ export function StickyCategoryBar({
     onSelect,
     scrolled = false,
 }: StickyCategoryBarProps) {
-    return (
-        <div className={cn(
-            "sticky z-40 w-full bg-white/95 dark:bg-black/95 px-5 transition-all duration-300 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800",
-            scrolled
-                ? "top-[64px] py-2.5 shadow-md"
-                : "top-0 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-3"
-        )}>
-            <div className="no-scrollbar flex gap-2.5 overflow-x-auto">
-                {categories.map((cat) => {
-                    const isActive = activeCategoryId === cat.id;
+    const [isStuck, setIsStuck] = useState(false);
+    const sentinelRef = useRef<HTMLDivElement>(null);
 
-                    return (
-                        <button
-                            key={cat.id}
-                            onClick={() => onSelect(cat.id)}
-                            className={cn(
-                                "relative whitespace-nowrap rounded-full px-5 py-2 text-[11px] font-black uppercase italic tracking-widest transition-all active:scale-95 border",
-                                isActive
-                                    ? "text-white border-transparent"
-                                    : "bg-white dark:bg-black border-brand/20 text-brand"
-                            )}
-                        >
-                            {isActive && (
-                                <motion.div
-                                    layoutId="activeCategory"
-                                    className="absolute inset-0 rounded-full bg-brand shadow-lg shadow-brand/20"
-                                    initial={false}
-                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                />
-                            )}
-                            <span className="relative z-10">{cat.name}</span>
-                        </button>
-                    );
-                })}
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsStuck(!entry.isIntersecting);
+            },
+            {
+                threshold: [1],
+                rootMargin: "-1px 0px 0px 0px"
+            }
+        );
+
+        if (sentinelRef.current) {
+            observer.observe(sentinelRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
+
+    return (
+        <>
+            <div ref={sentinelRef} className="h-px w-full" />
+            <div className={cn(
+                "sticky top-0 z-40 w-full bg-white dark:bg-black px-5 transition-all duration-300 py-4 border-b border-gray-100 dark:border-gray-800",
+                isStuck && "shadow-md shadow-black/5 dark:shadow-black/20"
+            )}>
+                <div className="no-scrollbar flex gap-6 overflow-x-auto items-center">
+                    {categories.map((cat) => {
+                        const isActive = activeCategoryId === cat.id;
+
+                        return (
+                            <button
+                                key={cat.id}
+                                onClick={() => onSelect(cat.id)}
+                                className={cn(
+                                    "relative whitespace-nowrap py-1 text-[11px] font-black uppercase italic tracking-widest transition-all active:scale-95",
+                                    isActive ? "text-brand" : "text-color-primary opacity-60"
+                                )}
+                            >
+                                <span className="relative z-10">{cat.name}</span>
+
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="activeCategoryIndicator"
+                                        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-brand rounded-full"
+                                        initial={false}
+                                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                    />
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
-        </div>
+        </>
     );
 }

@@ -50,4 +50,12 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='store_config' AND column_name='lng') THEN
         ALTER TABLE public.store_config ADD COLUMN lng DECIMAL DEFAULT -46.6333;
     END IF;
+
+    -- Coordenadas nos endereços dos usuários
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='user_addresses' AND column_name='lat') THEN
+        ALTER TABLE public.user_addresses ADD COLUMN lat DECIMAL;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='user_addresses' AND column_name='lng') THEN
+        ALTER TABLE public.user_addresses ADD COLUMN lng DECIMAL;
+    END IF;
 END $$;

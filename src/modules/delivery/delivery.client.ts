@@ -12,7 +12,7 @@ export async function calculateDeliveryRemote({
     orderValue: number;
 }): Promise<DeliveryCalculationResult> {
     try {
-        const response = await fetch("/api/delivery/calculate", {
+        const response = await fetch("/api/delivery", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -20,12 +20,24 @@ export async function calculateDeliveryRemote({
             body: JSON.stringify({ lat, lng, orderValue }),
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Erro ao calcular entrega");
+        // Lê como texto primeiro para evitar erro de JSON inválido/vazio
+        const text = await response.text();
+        if (!text || text.trim() === "") {
+            throw new Error("Servidor retornou resposta vazia. Verifique as configurações do motor de entrega.");
         }
 
-        return await response.json();
+        let data: DeliveryCalculationResult;
+        try {
+            data = JSON.parse(text);
+        } catch {
+            throw new Error("Resposta inválida do servidor. Tente novamente.");
+        }
+
+        if (!response.ok) {
+            throw new Error((data as any).error || `Erro ${response.status} ao calcular entrega`);
+        }
+
+        return data;
     } catch (error: any) {
         console.error("[DeliveryClient] Error:", error);
         return {

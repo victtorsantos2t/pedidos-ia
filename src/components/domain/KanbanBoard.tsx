@@ -6,7 +6,7 @@ import { updateOrderStatus } from "@/lib/actions/adminActions";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/core/Card";
 import { Button } from "@/components/core/Button";
-import { Clock, ArrowRight, XCircle, AlertCircle, AlertTriangle, ChefHat, Bell, BellOff } from "lucide-react";
+import { Clock, ArrowRight, XCircle, AlertCircle, AlertTriangle, ChefHat, Bell, BellOff, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOrdersStore } from "@/lib/ordersStore";
 import { parseEstimatedTime } from "@/lib/storeUtils";
@@ -23,7 +23,7 @@ interface OrderItem {
     notes?: string;
 }
 
-interface Order {
+export interface Order {
     id: string;
     customer_name: string;
     customer_phone: string;
@@ -32,14 +32,15 @@ interface Order {
     status: OrderStatus;
     total_amount: number;
     created_at: string;
+    cancel_reason?: string;
     order_items?: OrderItem[];
 }
 
-const COLUMNS: { id: OrderStatus; label: string; color: string }[] = [
-    { id: "NEW", label: "Novos Pedidos", color: "bg-blue-50 dark:bg-blue-950/20 border-blue-200" },
-    { id: "PREPARING", label: "Em Preparo", color: "bg-amber-50 dark:bg-amber-950/20 border-amber-200" },
-    { id: "READY", label: "Prontos / Despache", color: "bg-green-50 dark:bg-green-950/20 border-green-200" },
-    { id: "DELIVERY", label: "Em Rota", color: "bg-purple-50 dark:bg-purple-950/20 border-purple-200" },
+const COLUMNS: { id: OrderStatus; label: string; color: string; borderTop: string }[] = [
+    { id: "NEW", label: "Novos Pedidos", color: "bg-blue-50 dark:bg-blue-950/20 border-blue-200", borderTop: "border-t-4 border-blue-500" },
+    { id: "PREPARING", label: "Em Preparo", color: "bg-amber-50 dark:bg-amber-950/20 border-amber-200", borderTop: "border-t-4 border-amber-500" },
+    { id: "READY", label: "Prontos / Despache", color: "bg-green-50 dark:bg-green-950/20 border-green-200", borderTop: "border-t-4 border-green-500" },
+    { id: "DELIVERY", label: "Em Rota", color: "bg-purple-50 dark:bg-purple-950/20 border-purple-200", borderTop: "border-t-4 border-purple-400" },
 ];
 
 const STATUS_FLOW: Record<OrderStatus, OrderStatus | null> = {
@@ -131,119 +132,126 @@ export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: O
         <div className="flex h-full lg:overflow-x-auto xl:overflow-x-hidden p-6 gap-6 bg-gray-50/50 dark:bg-background relative no-scrollbar">
 
             {COLUMNS.map((col) => (
-                <div key={col.id} className="flex min-w-[320px] max-w-[350px] flex-col rounded-xl bg-gray-100/50 p-4 dark:bg-gray-900/50">
-                    <div className="mb-4 flex items-center justify-between px-2 text-sm font-black uppercase italic tracking-tighter text-gray-500">
+                <div key={col.id} className={cn("flex min-w-[320px] max-w-[350px] flex-col rounded-xl bg-gray-100/50 p-4 dark:bg-gray-900/50", col.borderTop)}>
+                    <div className="mb-4 flex items-center justify-between px-2 text-sm font-bold uppercase tracking-tight text-gray-500">
                         <h2>{col.label}</h2>
                         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-sm dark:bg-gray-800">{orders.filter(o => o.status === col.id).length}</span>
                     </div>
 
                     <div className="flex flex-1 flex-col gap-4 overflow-y-auto no-scrollbar pb-4">
-                        <AnimatePresence>
-                            {orders.filter(o => o.status === col.id).map((order) => {
-                                const createdAt = new Date(order.created_at).getTime();
-                                const elapsedMin = Math.floor((currentTime.getTime() - createdAt) / 60000);
-                                const maxMin = parseEstimatedTime(storeSettings?.estimated_time);
-                                const isDelayed = elapsedMin > (maxMin + 5);
-                                const remainingMin = maxMin - elapsedMin;
+                        {orders.filter(o => o.status === col.id).length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-full opacity-40 text-gray-500 mt-10">
+                                <Package className="h-10 w-10 mb-2" />
+                                <p className="text-xs font-medium">Nenhum pedido</p>
+                            </div>
+                        ) : (
+                            <AnimatePresence>
+                                {orders.filter(o => o.status === col.id).map((order) => {
+                                    const createdAt = new Date(order.created_at).getTime();
+                                    const elapsedMin = Math.floor((currentTime.getTime() - createdAt) / 60000);
+                                    const maxMin = parseEstimatedTime(storeSettings?.estimated_time);
+                                    const isDelayed = elapsedMin > (maxMin + 5);
+                                    const remainingMin = maxMin - elapsedMin;
 
-                                return (
-                                    <motion.div key={order.id} layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
-                                        <Card className={cn(
-                                            "border shadow-sm transition-all duration-500 rounded-[14px] bg-blue-50/50 dark:bg-blue-950/10 border-blue-200/60",
-                                            isDelayed ? "border-2 border-[#FA0000] animate-[pulse_2s_infinite] shadow-[0_0_20px_rgba(250,0,0,0.4)] bg-white dark:bg-gray-900" : ""
-                                        )}>
-                                            <CardHeader className="p-4 pb-0">
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        {isDelayed && (
-                                                            <div className="h-8 w-8 rounded-lg bg-[#FA0000] text-white flex items-center justify-center animate-bounce shadow-lg shadow-red-500/40">
-                                                                <AlertCircle className="h-5 w-5" />
+                                    return (
+                                        <motion.div key={order.id} layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+                                            <Card className={cn(
+                                                "border shadow-sm transition-all duration-500 rounded-[14px] bg-blue-50/50 dark:bg-blue-950/10 border-blue-200/60",
+                                                isDelayed ? "border-2 border-[#FA0000] animate-[pulse_2s_infinite] shadow-[0_0_20px_rgba(250,0,0,0.4)] bg-white dark:bg-gray-900" : ""
+                                            )}>
+                                                <CardHeader className="p-4 pb-0">
+                                                    <div className="flex items-start justify-between">
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            {isDelayed && (
+                                                                <div className="h-8 w-8 rounded-lg bg-[#FA0000] text-white flex items-center justify-center animate-bounce shadow-lg shadow-red-500/40">
+                                                                    <AlertCircle className="h-5 w-5" />
+                                                                </div>
+                                                            )}
+                                                            <div className="flex flex-col">
+                                                                <CardTitle className={cn("text-lg font-bold tracking-tight", isDelayed ? "text-[#FA0000]" : "text-[#111827] dark:text-gray-100")}>#{order.id.slice(0, 6).toUpperCase()}</CardTitle>
+                                                                <p className="text-sm font-medium text-gray-600 mt-0.5">{order.customer_name}</p>
                                                             </div>
-                                                        )}
-                                                        <div className="flex flex-col">
-                                                            <CardTitle className={cn("text-lg font-black italic tracking-tighter", isDelayed ? "text-[#FA0000]" : "text-[#111827] dark:text-gray-100")}>#{order.id.slice(0, 6).toUpperCase()}</CardTitle>
-                                                            <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest mt-0.5">{order.customer_name}</p>
+                                                        </div>
+                                                        <div className="flex flex-col items-end">
+                                                            {isDelayed ? (
+                                                                <div className="bg-[#FA0000] text-white px-2 py-1 rounded-lg text-xs font-bold tracking-tight flex items-center gap-1.5 shadow-sm mb-1">
+                                                                    <Clock className="h-3 w-3" />
+                                                                    <span>-{Math.abs(remainingMin)} MIN</span>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="text-sm font-bold text-gray-500 dark:text-gray-400 tabular-nums mb-1">
+                                                                    {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(order.total_amount)}
+                                                                </div>
+                                                            )}
+                                                            <p className="text-[10px] font-medium uppercase tracking-wide text-[#E5E7EB] dark:text-gray-700">
+                                                                {order.payment_method === "ON_DELIVERY" ? "PGTO ENTREGA" : "PGTO PIX"}
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex flex-col items-end">
-                                                        {isDelayed ? (
-                                                            <div className="bg-[#FA0000] text-white px-2 py-1 rounded-lg text-[11px] font-black italic tracking-tighter flex items-center gap-1.5 shadow-lg shadow-red-500/20 mb-1">
-                                                                <Clock className="h-3 w-3" />
-                                                                <span>-{Math.abs(remainingMin)} MIN</span>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="text-sm font-black text-gray-500 dark:text-gray-400 tabular-nums italic mb-1">
-                                                                {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(order.total_amount)}
-                                                            </div>
+                                                </CardHeader>
+                                                <CardContent className="p-4 pt-3">
+                                                    <div className="space-y-2">
+                                                        {/* Itens reais do pedido */}
+                                                        {order.order_items && order.order_items.length > 0 && (
+                                                            <ul className="space-y-1">
+                                                                {order.order_items.map((item: any) => (
+                                                                    <li key={item.id} className="flex items-start gap-1.5">
+                                                                        <span className="text-xs font-bold text-[#FA0000] shrink-0">{item.quantity}x</span>
+                                                                        <div className="flex flex-col">
+                                                                            <span className="text-xs font-medium text-gray-700 dark:text-gray-200 leading-tight">{item.name || item.product?.name}</span>
+                                                                            {item.notes && (
+                                                                                <span className="text-[10px] text-[#FA0000] font-medium mt-0.5">Obs: {item.notes}</span>
+                                                                            )}
+                                                                        </div>
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
                                                         )}
-                                                        <p className="text-[9px] font-black uppercase tracking-widest text-[#E5E7EB] dark:text-gray-700 italic">
-                                                            {order.payment_method === "ON_DELIVERY" ? "PGTO ENTREGA" : "PGTO PIX"}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </CardHeader>
-                                            <CardContent className="p-4 pt-3">
-                                                <div className="space-y-2">
-                                                    {/* Itens reais do pedido */}
-                                                    {order.order_items && order.order_items.length > 0 && (
-                                                        <ul className="space-y-1">
-                                                            {order.order_items.map((item: any) => (
-                                                                <li key={item.id} className="flex items-start gap-1.5">
-                                                                    <span className="text-[11px] font-black text-[#FA0000] shrink-0">{item.quantity}x</span>
-                                                                    <div className="flex flex-col">
-                                                                        <span className="text-[11px] font-bold text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">{item.name || item.product?.name}</span>
-                                                                        {item.notes && (
-                                                                            <span className="text-[9px] italic text-[#FA0000] font-bold">Obs: {item.notes}</span>
-                                                                        )}
-                                                                    </div>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    )}
 
-                                                    {/* Endereço e Horário */}
-                                                    <div className="flex flex-col gap-1 pt-1 border-t border-gray-100 dark:border-gray-800 mt-2">
-                                                        {order.delivery_address && (
-                                                            <p className="text-[9px] text-gray-400 font-bold truncate">{order.delivery_address}</p>
-                                                        )}
-                                                        <div className="flex items-center gap-1">
-                                                            <Clock className={cn("h-3 w-3", isDelayed ? "text-[#FA0000]" : "text-gray-400")} />
-                                                            <span className={cn("text-[9px] font-black", isDelayed ? "text-[#FA0000]" : "text-gray-400")}>
-                                                                {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                                {isDelayed && ` • Atraso: ${elapsedMin}min`}
-                                                            </span>
+                                                        {/* Endereço e Horário */}
+                                                        <div className="flex flex-col gap-1 pt-1 border-t border-gray-100 dark:border-gray-800 mt-2">
+                                                            {order.delivery_address && (
+                                                                <p className="text-xs text-gray-500 font-medium truncate">{order.delivery_address}</p>
+                                                            )}
+                                                            <div className="flex items-center gap-1">
+                                                                <Clock className={cn("h-3 w-3", isDelayed ? "text-[#FA0000]" : "text-gray-400")} />
+                                                                <span className={cn("text-xs font-medium", isDelayed ? "text-[#FA0000]" : "text-gray-400")}>
+                                                                    {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                    {isDelayed && ` • Atraso: ${elapsedMin}min`}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </CardContent>
-                                            <CardFooter className="p-4 pt-0 flex items-center justify-between gap-3 border-t border-blue-100/50 dark:border-blue-900/30 mt-2">
-                                                {isDelayed ? (
-                                                    <Button className="w-full h-11 bg-[#FA0000] hover:bg-[#D00000] text-white text-[10px] font-black uppercase italic tracking-widest shadow-lg shadow-red-500/20 gap-2 border-0 mt-3" onClick={() => handleAdvanceStatus(order.id, order.status, order.payment_method)}>
-                                                        <ChefHat className="h-4 w-4" /> PRIORIZAR NA COZINHA
-                                                    </Button>
-                                                ) : (
-                                                    <>
-                                                        <button
-                                                            className="flex items-center gap-1.5 text-[10px] text-gray-300 font-black uppercase italic tracking-widest hover:text-red-500 transition-colors mt-3"
-                                                            onClick={() => setOrderToCancel(order.id)}
-                                                        >
-                                                            <XCircle className="h-3.5 w-3.5" /> CANCELAR
-                                                        </button>
-
-                                                        <Button
-                                                            className="h-10 px-5 rounded-lg bg-[#FA0000] hover:bg-[#D00000] text-white text-[11px] font-black uppercase italic tracking-widest shadow-lg shadow-red-500/20 flex items-center gap-2 mt-3"
-                                                            onClick={() => handleAdvanceStatus(order.id, order.status, order.payment_method)}
-                                                        >
-                                                            Avançar <ArrowRight className="h-4 w-4" />
+                                                </CardContent>
+                                                <CardFooter className="p-4 pt-0 flex items-center justify-between gap-3 border-t border-blue-100/50 dark:border-blue-900/30 mt-2">
+                                                    {isDelayed ? (
+                                                        <Button className="w-full h-11 bg-[#FA0000] hover:bg-[#D00000] text-white text-[11px] font-bold uppercase tracking-wide shadow-sm gap-2 border-0 mt-3" onClick={() => handleAdvanceStatus(order.id, order.status, order.payment_method)}>
+                                                            <ChefHat className="h-4 w-4" /> PRIORIZAR NA COZINHA
                                                         </Button>
-                                                    </>
-                                                )}
-                                            </CardFooter>
-                                        </Card>
-                                    </motion.div>
-                                );
-                            })}
-                        </AnimatePresence>
+                                                    ) : (
+                                                        <>
+                                                            <button
+                                                                className="flex items-center gap-1.5 text-[11px] text-gray-400 font-bold uppercase tracking-wide hover:text-red-500 transition-colors mt-3"
+                                                                onClick={() => setOrderToCancel(order.id)}
+                                                            >
+                                                                <XCircle className="h-3.5 w-3.5" /> CANCELAR
+                                                            </button>
+
+                                                            <Button
+                                                                className="h-10 px-5 rounded-lg bg-red-50 text-[#FA0000] hover:bg-red-100 text-[11px] font-bold uppercase tracking-wide flex items-center gap-2 mt-3"
+                                                                onClick={() => handleAdvanceStatus(order.id, order.status, order.payment_method)}
+                                                            >
+                                                                Avançar <ArrowRight className="h-4 w-4" />
+                                                            </Button>
+                                                        </>
+                                                    )}
+                                                </CardFooter>
+                                            </Card>
+                                        </motion.div>
+                                    );
+                                })}
+                            </AnimatePresence>
+                        )}
                     </div>
                 </div>
             ))}
@@ -277,14 +285,14 @@ export function KanbanBoard({ initialOrders, storeSettings }: { initialOrders: O
             </AnimatePresence>
             {/* Indicador de Status de Áudio (Crucial para Monitores de Cozinha) */}
             {!audioUnlocked && (
-                <div className="fixed bottom-10 right-10 z-[100]">
+                <div className="fixed top-24 right-6 z-[100]">
                     <motion.button
                         initial={{ opacity: 0, y: 50, scale: 0.5 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => unlockAudio()}
-                        className="bg-brand text-white px-8 py-5 rounded-3xl shadow-[0_20px_50px_rgba(250,0,0,0.4)] border-4 border-white flex items-center gap-4 font-black uppercase italic tracking-widest text-base animate-bounce"
+                        className="bg-brand text-white px-4 py-2 rounded-full shadow-lg border-2 border-white flex items-center gap-2 font-bold uppercase text-xs animate-pulse hover:bg-red-600 transition-all"
                     >
                         <BellOff className="h-7 w-7" />
                         Clique para Ativar o Som

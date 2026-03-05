@@ -1,14 +1,6 @@
 ﻿import type { Metadata, Viewport } from "next";
-import { Sora } from "next/font/google";
+import "@fontsource/sora";
 import "./globals.css";
-
-const sora = Sora({
-  variable: "--font-sora",
-  subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800"],
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   title: "RDOS - Restaurant Digital Ordering System",
   description: "Peça sua comida de forma rápida e premium.",
@@ -32,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${sora.variable} antialiased bg-background text-foreground`}>
+      <body className={`font-sans antialiased bg-background text-foreground`}>
         {children}
         <BottomNav />
         <Toaster position="top-center" richColors />

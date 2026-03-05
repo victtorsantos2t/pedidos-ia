@@ -204,7 +204,7 @@ export function OrderRatingCard({ orderId, initialRating, onActiveChange }: Orde
 
                         {comment && (
                             <p className="text-sm text-foreground dark:text-gray-300 font-bold italic leading-relaxed pt-2 border-t border-gray-50 dark:border-gray-800/50">
-                                "{comment}"
+                                &quot;{comment}&quot;
                             </p>
                         )}
 
@@ -217,7 +217,7 @@ export function OrderRatingCard({ orderId, initialRating, onActiveChange }: Orde
                                     <span className="text-[9px] font-black uppercase text-brand tracking-widest italic">Resposta da Loja</span>
                                 </div>
                                 <p className="text-xs text-gray-600 dark:text-gray-400 font-bold italic leading-relaxed">
-                                    "{initialRating.store_response}"
+                                    &quot;{initialRating.store_response}&quot;
                                 </p>
                             </div>
                         )}

@@ -56,6 +56,8 @@ export async function createAddress(formData: FormData) {
     const city = formData.get("city") as string;
     const complement = formData.get("complement") as string;
     const is_default = formData.get("is_default") === "on";
+    const lat = formData.get("lat") ? parseFloat(formData.get("lat") as string) : null;
+    const lng = formData.get("lng") ? parseFloat(formData.get("lng") as string) : null;
 
     // Se for o primeiro endereço ou marcado como padrão, remove padrão dos outros
     if (is_default) {
@@ -74,7 +76,8 @@ export async function createAddress(formData: FormData) {
             neighborhood,
             city,
             complement,
-            is_default
+            is_default,
+            ...(lat && lng ? { lat, lng } : {}),
         });
 
     if (error) return { error: error.message };
@@ -95,6 +98,8 @@ export async function updateAddress(addressId: string, formData: FormData) {
     const city = formData.get("city") as string;
     const complement = formData.get("complement") as string;
     const is_default = formData.get("is_default") === "on";
+    const lat = formData.get("lat") ? parseFloat(formData.get("lat") as string) : null;
+    const lng = formData.get("lng") ? parseFloat(formData.get("lng") as string) : null;
 
     if (is_default) {
         await supabase
@@ -111,7 +116,8 @@ export async function updateAddress(addressId: string, formData: FormData) {
             neighborhood,
             city,
             complement,
-            is_default
+            is_default,
+            ...(lat && lng ? { lat, lng } : {}),
         })
         .eq("id", addressId)
         .eq("user_id", user.id);

@@ -9,11 +9,40 @@ import { Eye, EyeOff, Plus, Trash2, ChevronDown, ChevronUp, Pencil, X, Check, Ta
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function MenuManager({ categories, products }: { categories: any[], products: any[] }) {
+export interface Category {
+    id: string;
+    name: string;
+    station?: string;
+    sort_order?: number;
+    is_active?: boolean;
+    [key: string]: unknown;
+}
+
+export interface ProductExtra {
+    id: string;
+    name: string;
+    price: number | string;
+    [key: string]: unknown;
+}
+
+export interface Product {
+    id: string;
+    name: string;
+    description: string;
+    price: number | string;
+    category_id: string;
+    image_url: string;
+    is_available: boolean;
+    product_extras?: ProductExtra[];
+    [key: string]: unknown;
+}
+
+export function MenuManager({ categories, products }: { categories: Category[], products: Product[] }) {
     const [loading, setLoading] = useState(false);
     const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
     const [editingCategory, setEditingCategory] = useState<string | null>(null);
     const [editCategoryName, setEditCategoryName] = useState("");
+    const [editCategoryStation, setEditCategoryStation] = useState("MAIN");
     const [catError, setCatError] = useState<string | null>(null);
     const [prodError, setProdError] = useState<string | null>(null);
     const [filterCategory, setFilterCategory] = useState("all");
@@ -25,7 +54,7 @@ export function MenuManager({ categories, products }: { categories: any[], produ
 
     const filteredProducts = filterCategory === "all"
         ? products
-        : products.filter((p: any) => p.category_id === filterCategory);
+        : products.filter((p: Product) => p.category_id === filterCategory);
 
     const handleCreateCategory = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -68,9 +97,10 @@ export function MenuManager({ categories, products }: { categories: any[], produ
         await deleteExtra(extraId);
     };
 
-    const handleStartEdit = (cat: any) => {
+    const handleStartEdit = (cat: Category) => {
         setEditingCategory(cat.id);
         setEditCategoryName(cat.name);
+        setEditCategoryStation(cat.station || "MAIN");
         setCatError(null);
     };
 
@@ -84,7 +114,7 @@ export function MenuManager({ categories, products }: { categories: any[], produ
         if (!editCategoryName.trim()) return;
         setLoading(true);
         setCatError(null);
-        const res = await updateCategory(categoryId, editCategoryName.trim());
+        const res = await updateCategory(categoryId, editCategoryName.trim(), editCategoryStation);
         if (res?.error) setCatError(res.error);
         else handleCancelEdit();
         setLoading(false);
@@ -141,16 +171,31 @@ export function MenuManager({ categories, products }: { categories: any[], produ
                         </CardHeader>
                         <CardContent className="pt-6 px-6 pb-6">
                             <form onSubmit={handleCreateCategory} className="space-y-4">
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="cat_name" className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Nome</Label>
-                                    <Input
-                                        id="cat_name"
-                                        name="name"
-                                        required
-                                        placeholder="Ex: Lanches, Bebidas..."
-                                        className="h-11 rounded-xl text-sm font-medium focus:ring-4 ring-red-500/5 bg-gray-50/50 dark:bg-gray-900/50"
-                                        leftIcon={<Tag className="h-4 w-4 text-gray-400" />}
-                                    />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="cat_name" className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Nome</Label>
+                                        <Input
+                                            id="cat_name"
+                                            name="name"
+                                            required
+                                            placeholder="Ex: Lanches, Bebidas..."
+                                            className="h-11 rounded-xl text-sm font-medium focus:ring-4 ring-red-500/5 bg-gray-50/50 dark:bg-gray-900/50"
+                                            leftIcon={<Tag className="h-4 w-4 text-gray-400" />}
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="cat_station" className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Produção (Cozinha)</Label>
+                                        <select
+                                            name="station"
+                                            id="cat_station"
+                                            className="w-full h-11 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 px-4 text-[11px] font-black uppercase tracking-tight focus:border-[#FA0000] focus:ring-4 focus:ring-red-500/5 outline-none appearance-none"
+                                        >
+                                            <option value="MAIN">Montagem (Padrão)</option>
+                                            <option value="GRILL">Chapa / Grill</option>
+                                            <option value="DRINKS">Bar / Bebidas</option>
+                                            <option value="FRY">Fritadeira</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <Button type="submit" disabled={loading} className="w-full bg-[#FA0000] hover:bg-red-600 text-white rounded-xl h-11 text-[10px] font-black uppercase tracking-[0.2em] italic shadow-lg shadow-red-500/10">
                                     {loading ? "Salvando..." : "Adicionar Categoria"}
@@ -178,8 +223,8 @@ export function MenuManager({ categories, products }: { categories: any[], produ
                             </div>
                         ) : (
                             <ul className="space-y-3">
-                                {categories.map((c: any) => {
-                                    const linkedCount = products.filter((p: any) => p.category_id === c.id).length;
+                                {categories.map((c: Category) => {
+                                    const linkedCount = products.filter((p: Product) => p.category_id === c.id).length;
                                     const isEditing = editingCategory === c.id;
 
                                     return (
@@ -189,26 +234,38 @@ export function MenuManager({ categories, products }: { categories: any[], produ
                                                 isEditing ? "border-[#FA0000] bg-red-50/5 dark:bg-red-950/5" : "bg-gray-50/50 dark:bg-gray-900/50 border-transparent hover:border-gray-200 dark:hover:border-gray-700"
                                             )}>
                                                 {isEditing ? (
-                                                    <div className="flex items-center gap-3 w-full animate-in fade-in slide-in-from-left-2 duration-300">
-                                                        <Input
-                                                            type="text"
-                                                            value={editCategoryName}
-                                                            onChange={(e) => setEditCategoryName(e.target.value)}
-                                                            className="flex-1 h-10 rounded-lg text-xs font-bold uppercase tracking-tight"
-                                                            autoFocus
-                                                            onKeyDown={(e) => {
-                                                                if (e.key === "Enter") handleSaveEdit(c.id);
-                                                                if (e.key === "Escape") handleCancelEdit();
-                                                            }}
-                                                        />
-                                                        <div className="flex gap-1">
-                                                            <button onClick={() => handleSaveEdit(c.id)} className="h-9 w-9 rounded-lg bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20">
-                                                                <Check className="h-4 w-4" />
-                                                            </button>
-                                                            <button onClick={handleCancelEdit} className="h-9 w-9 rounded-lg bg-gray-500 text-white flex items-center justify-center hover:bg-gray-600 transition-colors">
-                                                                <X className="h-4 w-4" />
-                                                            </button>
+                                                    <div className="flex flex-col gap-2 w-full animate-in fade-in slide-in-from-left-2 duration-300">
+                                                        <div className="flex items-center gap-3">
+                                                            <Input
+                                                                type="text"
+                                                                value={editCategoryName}
+                                                                onChange={(e) => setEditCategoryName(e.target.value)}
+                                                                className="flex-1 h-10 rounded-lg text-xs font-bold uppercase tracking-tight"
+                                                                autoFocus
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === "Enter") handleSaveEdit(c.id);
+                                                                    if (e.key === "Escape") handleCancelEdit();
+                                                                }}
+                                                            />
+                                                            <div className="flex gap-1">
+                                                                <button onClick={() => handleSaveEdit(c.id)} className="h-9 w-9 rounded-lg bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20">
+                                                                    <Check className="h-4 w-4" />
+                                                                </button>
+                                                                <button onClick={handleCancelEdit} className="h-9 w-9 rounded-lg bg-gray-500 text-white flex items-center justify-center hover:bg-gray-600 transition-colors">
+                                                                    <X className="h-4 w-4" />
+                                                                </button>
+                                                            </div>
                                                         </div>
+                                                        <select
+                                                            value={editCategoryStation}
+                                                            onChange={(e) => setEditCategoryStation(e.target.value)}
+                                                            className="w-full h-10 rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 px-3 text-[10px] font-black uppercase focus:border-[#FA0000] outline-none"
+                                                        >
+                                                            <option value="MAIN">Montagem (Padrão)</option>
+                                                            <option value="GRILL">Chapa / Grill</option>
+                                                            <option value="DRINKS">Bar / Bebidas</option>
+                                                            <option value="FRY">Fritadeira</option>
+                                                        </select>
                                                     </div>
                                                 ) : (
                                                     <>
@@ -219,7 +276,7 @@ export function MenuManager({ categories, products }: { categories: any[], produ
                                                         <div className="flex-1 min-w-0">
                                                             <span className="text-sm font-black text-[#2A2A2A] dark:text-gray-100 uppercase tracking-tighter block truncate italic">{c.name}</span>
                                                             <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest opacity-60">
-                                                                {linkedCount} {linkedCount === 1 ? "item" : "itens"}
+                                                                {linkedCount} {linkedCount === 1 ? "item" : "itens"} • Estação <span className="text-[#FA0000]">{c.station || "MAIN"}</span>
                                                             </span>
                                                         </div>
                                                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
@@ -358,7 +415,7 @@ export function MenuManager({ categories, products }: { categories: any[], produ
                                         />
                                     )}
                                 </button>
-                                {categories.map((c: any) => (
+                                {categories.map((c: Category) => (
                                     <button
                                         key={c.id}
                                         onClick={() => setFilterCategory(c.id)}
@@ -390,11 +447,11 @@ export function MenuManager({ categories, products }: { categories: any[], produ
                                         <p className="text-[10px] font-black uppercase tracking-widest italic">Sem correspondência</p>
                                     </motion.div>
                                 ) : (
-                                    filteredProducts.map((p: any) => {
+                                    filteredProducts.map((p: Product) => {
                                         const isExpanded = expandedProduct === p.id;
                                         const isEditingThis = editingProduct === p.id;
                                         const extras = p.product_extras || [];
-                                        const catName = categories.find((c: any) => c.id === p.category_id)?.name || "Geral";
+                                        const catName = categories.find((c: Category) => c.id === p.category_id)?.name || "Geral";
 
                                         return (
                                             <motion.div
@@ -457,8 +514,8 @@ export function MenuManager({ categories, products }: { categories: any[], produ
                                                                         }
                                                                     }}
                                                                     className={cn(
-                                                                        "h-9 px-4 flex items-center gap-2 rounded-xl transition-all font-black text-[9px] uppercase tracking-widest italic shadow-lg shadow-red-500/5 active:scale-95",
-                                                                        isEditingThis ? "bg-[#2A2A2A] text-white" : "bg-[#FA0000] text-white hover:bg-red-600"
+                                                                        "h-9 px-4 flex items-center gap-2 rounded-xl border transition-all font-black text-[9px] uppercase tracking-widest italic active:scale-95",
+                                                                        isEditingThis ? "bg-[#2A2A2A] text-white border-transparent" : "bg-transparent text-gray-500 border-gray-200 hover:border-[#FA0000] hover:text-[#FA0000] dark:border-gray-700 dark:text-gray-400 dark:hover:text-[#FA0000]"
                                                                     )}
                                                                 >
                                                                     {isEditingThis ? <Check className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
@@ -508,7 +565,7 @@ export function MenuManager({ categories, products }: { categories: any[], produ
                                                                             onChange={(e) => setEditProductData({ ...editProductData, category_id: e.target.value })}
                                                                             className="w-full h-12 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 text-[10px] font-black uppercase focus:ring-4 ring-red-500/5 transition-all outline-none"
                                                                         >
-                                                                            {categories.map((c: any) => (
+                                                                            {categories.map((c: Category) => (
                                                                                 <option key={c.id} value={c.id}>{c.name}</option>
                                                                             ))}
                                                                         </select>
@@ -593,7 +650,7 @@ export function MenuManager({ categories, products }: { categories: any[], produ
 
                                                                 {extras.length > 0 ? (
                                                                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                                        {extras.map((ex: any) => (
+                                                                        {extras.map((ex: ProductExtra) => (
                                                                             <li key={ex.id} className="flex items-center justify-between py-3 px-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-50 dark:border-gray-800 shadow-sm hover:border-[#FA0000]/20 transition-all group">
                                                                                 <span className="text-[11px] font-bold text-[#2A2A2A] dark:text-gray-200 uppercase tracking-tight">{ex.name}</span>
                                                                                 <div className="flex items-center gap-4">

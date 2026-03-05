@@ -169,7 +169,7 @@ export function AdminRatingsManager() {
                                     {rating.comment && (
                                         <div className="mb-6">
                                             <p className="text-[#2A2A2A] dark:text-gray-200 font-medium italic leading-relaxed text-sm">
-                                                "{rating.comment}"
+                                                &quot;{rating.comment}&quot;
                                             </p>
                                         </div>
                                     )}
@@ -221,7 +221,7 @@ export function AdminRatingsManager() {
                                                 <span className="text-[10px] font-black uppercase text-[#FA0000] tracking-widest italic">Resposta da Loja</span>
                                             </div>
                                             <p className="text-xs text-gray-700 dark:text-gray-400 font-bold italic leading-relaxed">
-                                                "{rating.store_response}"
+                                                &quot;{rating.store_response}&quot;
                                             </p>
                                         </motion.div>
                                     ) : (

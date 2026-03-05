@@ -73,6 +73,7 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
     const [activeTab, setActiveTab] = useState<'avaliacoes' | 'informacoes'>('avaliacoes');
     const [filter, setFilter] = useState<'recentes' | 'comentarios'>('recentes');
     const [starFilter, setStarFilter] = useState<number | null>(null);
+    const [visibleCount, setVisibleCount] = useState(10);
 
     const average = stats.averageProduct || 0;
     const total = stats.total || 0;
@@ -125,7 +126,7 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                             onClick={() => setActiveTab(tab)}
                             className="relative flex-1 py-4 text-[11px] font-black uppercase tracking-widest transition-colors duration-300"
                         >
-                            <span className={activeTab === tab ? 'text-brand' : 'text-gray-400'}>
+                            <span className={activeTab === tab ? 'text-brand' : 'text-gray-600 dark:text-gray-400'}>
                                 {tab === 'avaliacoes' ? 'Avaliações' : 'Informações'}
                             </span>
                             {activeTab === tab && (
@@ -154,11 +155,11 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                 <h2 className="text-[18px] font-bold text-gray-900 dark:text-white uppercase tracking-tight mb-6 self-start">Desempenho do restaurante</h2>
 
                                 <div className="relative h-32 w-32 mb-6">
-                                    <svg className="h-full w-full transform -rotate-90">
+                                    <svg viewBox="0 0 128 128" className="h-full w-full transform -rotate-90 overflow-visible">
                                         <circle
                                             cx="64"
                                             cy="64"
-                                            r="58"
+                                            r="56"
                                             stroke="currentColor"
                                             strokeWidth="8"
                                             fill="transparent"
@@ -167,20 +168,20 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                         <motion.circle
                                             cx="64"
                                             cy="64"
-                                            r="58"
+                                            r="56"
                                             stroke="currentColor"
                                             strokeWidth="8"
                                             fill="transparent"
-                                            strokeDasharray={364}
-                                            initial={{ strokeDashoffset: 364 }}
-                                            animate={{ strokeDashoffset: 364 - (364 * (average / 5)) }}
+                                            strokeDasharray={352}
+                                            initial={{ strokeDashoffset: 352 }}
+                                            animate={{ strokeDashoffset: 352 - (352 * (average / 5)) }}
                                             transition={{ duration: 1.5, ease: "easeOut" }}
                                             className={average >= 4.5 ? "text-amber-500" : "text-gray-400"}
                                         />
                                     </svg>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                                         <span className="text-2xl font-black text-gray-900 dark:text-white">{average}</span>
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nível {levelData.level}</span>
+                                        <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-widest">Nível {levelData.level}</span>
                                     </div>
                                 </div>
 
@@ -191,15 +192,15 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                 <div className="grid grid-cols-3 gap-8 w-full pt-6 border-t border-gray-50 dark:border-gray-800/50">
                                     <div className="flex flex-col items-center text-center">
                                         <CheckCircle2 className="h-5 w-5 text-emerald-500 mb-2" />
-                                        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Aprovado</span>
+                                        <span className="text-[9px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">Aprovado</span>
                                     </div>
                                     <div className="flex flex-col items-center text-center">
                                         <Clock className="h-5 w-5 text-amber-500 mb-2" />
-                                        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Pontualidade</span>
+                                        <span className="text-[9px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">Pontualidade</span>
                                     </div>
                                     <div className="flex flex-col items-center text-center">
                                         <Heart className="h-5 w-5 text-brand mb-2" />
-                                        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Qualidade</span>
+                                        <span className="text-[9px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">Qualidade</span>
                                     </div>
                                 </div>
                             </section>
@@ -214,7 +215,7 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                             <span className="text-4xl font-black text-gray-900 dark:text-white leading-none">{average}</span>
                                             <Star className="h-6 w-6 fill-amber-500 text-amber-500" />
                                         </div>
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{total} avaliações</span>
+                                        <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">{total} avaliações</span>
                                     </div>
 
                                     <div className="flex-1 space-y-2">
@@ -232,7 +233,7 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                                 >
                                                     <div className="flex items-center gap-1 w-6">
                                                         <span className="text-[11px] font-bold text-gray-900 dark:text-white">{star}</span>
-                                                        <Star className="h-2 w-2 fill-gray-400 text-gray-400" />
+                                                        <Star className="h-2 w-2 fill-gray-500 text-gray-500 dark:fill-gray-400 dark:text-gray-400" />
                                                     </div>
                                                     <div className="flex-1 h-2 bg-gray-50 dark:bg-gray-950 rounded-full overflow-hidden">
                                                         <motion.div
@@ -259,7 +260,7 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                                 "flex-1 h-11 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all",
                                                 filter === f
                                                     ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-                                                    : "bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                                                    : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                                             )}
                                         >
                                             {f === 'recentes' ? 'Recentes' : 'Comentários'}
@@ -271,7 +272,7 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                             {/* Feed de Comentários */}
                             <div className="space-y-4">
                                 <h2 className="text-[18px] font-bold text-gray-900 dark:text-white uppercase tracking-tight mb-6">Feed de comentários</h2>
-                                {filteredRatings.map((rating) => {
+                                {filteredRatings.slice(0, visibleCount).map((rating) => {
                                     const averageRating = Math.round((rating.product_rating + rating.delivery_rating) / 2);
 
                                     return (
@@ -283,7 +284,7 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                                         {rating.profiles?.avatar_url ? (
                                                             <img src={rating.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
                                                         ) : (
-                                                            <span className="text-sm font-bold text-gray-400 uppercase">
+                                                            <span className="text-sm font-bold text-gray-600 dark:text-gray-400 uppercase">
                                                                 {rating.profiles?.name?.charAt(0) || "U"}
                                                             </span>
                                                         )}
@@ -305,7 +306,7 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                                                 ))}
                                                             </div>
                                                         </div>
-                                                        <p className="text-[10px] text-gray-400 font-bold mt-1 uppercase tracking-widest">
+                                                        <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold mt-1 uppercase tracking-widest">
                                                             {formatDistanceToNow(new Date(rating.created_at), { addSuffix: true, locale: ptBR })}
                                                         </p>
                                                     </div>
@@ -315,7 +316,7 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                             {/* Comentário */}
                                             {rating.comment && (
                                                 <p className="text-[14px] text-gray-700 dark:text-gray-300 font-bold italic leading-relaxed mb-4">
-                                                    "{rating.comment}"
+                                                    &quot;{rating.comment}&quot;
                                                 </p>
                                             )}
 
@@ -325,7 +326,7 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                                     ratingId={rating.id}
                                                     initialLikes={rating.likes_count || 0}
                                                 />
-                                                <button className="text-gray-200 hover:text-[#FA0000] transition-colors">
+                                                <button className="text-gray-400 dark:text-gray-600 hover:text-[#FA0000] dark:hover:text-[#FA0000] transition-colors">
                                                     <Flag className="h-4 w-4" />
                                                 </button>
                                             </div>
@@ -339,14 +340,25 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                                         </div>
                                                         <span className="text-[9px] font-black uppercase text-[#FA0000] tracking-widest italic">Resposta do Restaurante</span>
                                                     </div>
-                                                    <p className="text-xs text-gray-600 dark:text-gray-400 font-bold italic leading-relaxed">
-                                                        "{rating.store_response}"
+                                                    <p className="text-xs text-gray-700 dark:text-gray-300 font-bold italic leading-relaxed">
+                                                        &quot;{rating.store_response}&quot;
                                                     </p>
                                                 </div>
                                             )}
                                         </section>
                                     );
                                 })}
+
+                                {visibleCount < filteredRatings.length && (
+                                    <div className="pt-6 pb-2 text-center">
+                                        <button
+                                            onClick={() => setVisibleCount(prev => prev + 10)}
+                                            className="px-6 py-3 rounded-full bg-white dark:bg-gray-900 text-brand font-bold text-xs uppercase tracking-widest border border-gray-100 dark:border-gray-800 shadow-sm transition-all active:scale-95 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                        >
+                                            Carregar mais
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </motion.div>
                     ) : (
@@ -360,10 +372,10 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                             {/* Descrição - Tipografia Refinada */}
                             <section className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
                                 <h2 className="text-[18px] font-bold text-[#2A2A2A] dark:text-white uppercase tracking-tight mb-4 flex items-center gap-2">
-                                    <Info className="h-5 w-5 text-gray-400" />
+                                    <Info className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                                     Descrição da loja
                                 </h2>
-                                <div className="space-y-4 text-[14px] text-[#616161] dark:text-gray-400 font-medium leading-[1.6]">
+                                <div className="space-y-4 text-[14px] text-[#4A4A4A] dark:text-gray-300 font-medium leading-[1.6]">
                                     <p className="flex items-start gap-2">
                                         <Flame className="h-4 w-4 text-brand flex-shrink-0 mt-1" />
                                         <span>{config.description?.split('\n')[0] || "Bem-vindo ao nosso restaurante! Sabor e qualidade em cada pedido."}</span>
@@ -396,15 +408,15 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                     {/* Exibição por agrupamento sugerido */}
                                     <div className="space-y-3">
                                         {/* Agrupamento Inteligente (Exemplo sugerido na doc) */}
-                                        <div className="flex justify-between items-center text-[13px] font-semibold text-[#616161] dark:text-gray-400 border-b border-gray-50 dark:border-gray-800 pb-2">
+                                        <div className="flex justify-between items-center text-[13px] font-semibold text-[#4A4A4A] dark:text-gray-300 border-b border-gray-50 dark:border-gray-800 pb-2">
                                             <span>Segunda</span>
                                             <span className="text-[#2A2A2A] dark:text-gray-100">06:00 às 23:59</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-[13px] font-semibold text-[#616161] dark:text-gray-400 border-b border-gray-50 dark:border-gray-800 pb-2">
+                                        <div className="flex justify-between items-center text-[13px] font-semibold text-[#4A4A4A] dark:text-gray-300 border-b border-gray-50 dark:border-gray-800 pb-2">
                                             <span>Terça a Sábado</span>
                                             <span className="text-[#2A2A2A] dark:text-gray-100">18:00 às 23:00</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-[13px] font-semibold text-[#616161] dark:text-gray-400">
+                                        <div className="flex justify-between items-center text-[13px] font-semibold text-[#4A4A4A] dark:text-gray-300">
                                             <span>Domingo</span>
                                             <span className="text-[#2A2A2A] dark:text-gray-100">15:00 às 23:59</span>
                                         </div>
@@ -440,7 +452,7 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                     <h2 className="text-[18px] font-bold text-[#2A2A2A] dark:text-white uppercase tracking-tight mb-4 text-center">
                                         Onde estamos
                                     </h2>
-                                    <div className="text-[14px] text-[#616161] dark:text-gray-300 font-medium leading-relaxed flex items-center justify-center gap-2 mb-6">
+                                    <div className="text-[14px] text-[#4A4A4A] dark:text-gray-300 font-medium leading-relaxed flex items-center justify-center gap-2 mb-6">
                                         <MapPin className="h-4 w-4 text-brand" />
                                         {config.pickup_address}
                                     </div>

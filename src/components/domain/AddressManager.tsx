@@ -32,8 +32,13 @@ export function AddressManager({ initialAddresses }: { initialAddresses: Address
     const [city, setCity] = useState("");
 
     const [cepValue, setCepValue] = useState("");
+    const [geoCoords, setGeoCoords] = useState<{ lat: number; lng: number } | null>(null);
+    const [geoLoading, setGeoLoading] = useState(false);
 
-    // O useEffect aqui serve pra refletir o CEP quando for editar o endereço existente
+    // GPS Native States
+    const [gpsLoading, setGpsLoading] = useState(false);
+    const [gpsError, setGpsError] = useState<string | null>(null);
+
     useEffect(() => {
         if (isAdding && editingAddress?.cep) {
             setCepValue(editingAddress.cep);
@@ -55,19 +60,107 @@ export function AddressManager({ initialAddresses }: { initialAddresses: Address
 
         if (cep.length === 8) {
             setCepLoading(true);
+            setGeoCoords(null);
             try {
                 const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
                 const data = await res.json();
                 if (!data.erro) {
-                    setStreet(data.logradouro || "");
-                    setNeighborhood(data.bairro || "");
-                    setCity(data.localidade || "");
+                    const logradouro = data.logradouro || "";
+                    const bairro = data.bairro || "";
+                    const localidade = data.localidade || "";
+                    const uf = data.uf || "";
+
+                    setStreet(logradouro);
+                    setNeighborhood(bairro);
+                    setCity(localidade);
+
+                    // Só tenta geocodificar se não tiver pego do GPS ainda
+                    if (!geoCoords) {
+                        setGeoLoading(true);
+                        const enderecos = [
+                            [logradouro, bairro, localidade, uf].filter(Boolean).join(", "),
+                            [bairro, localidade, uf].filter(Boolean).join(", "),
+                            [localidade, uf].filter(Boolean).join(", "),
+                        ].filter(Boolean);
+
+                        let foundCoords = null;
+                        for (const q of enderecos) {
+                            try {
+                                const nomRes = await fetch(
+                                    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=br`,
+                                    { headers: { "User-Agent": "rdos-restaurante-app/1.0" } }
+                                );
+                                const nomData = await nomRes.json();
+                                if (nomData && nomData.length > 0) {
+                                    foundCoords = {
+                                        lat: parseFloat(nomData[0].lat),
+                                        lng: parseFloat(nomData[0].lon),
+                                    };
+                                    setGeoCoords(foundCoords);
+                                    break;
+                                }
+                            } catch { /* tenta próximo nível */ }
+                        }
+                        if (!foundCoords) {
+                            setGpsError("Coordenadas automáticas não encontradas. Por favor, use o botão de GPS abaixo.");
+                        }
+                        setGeoLoading(false);
+                    }
                 }
             } catch (err) {
                 console.error("Erro ao buscar CEP:", err);
             } finally {
                 setCepLoading(false);
             }
+        }
+    };
+
+    const handleGetGPS = () => {
+        setGpsLoading(true);
+        setGpsError(null);
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    setGeoCoords({ lat, lng });
+
+                    // Busca o endereço correspondente às coordenadas (Reverse Geocoding)
+                    try {
+                        const res = await fetch(
+                            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
+                            { headers: { "User-Agent": "rdos-restaurante-app/1.0" } }
+                        );
+                        const data = await res.json();
+
+                        if (data && data.address) {
+                            const addr = data.address;
+                            if (addr.road) setStreet(addr.road);
+                            if (addr.suburb || addr.neighbourhood) setNeighborhood(addr.suburb || addr.neighbourhood);
+                            if (addr.city || addr.town || addr.village) setCity(addr.city || addr.town || addr.village);
+                            if (addr.postcode) {
+                                const rawCep = addr.postcode.replace(/\D/g, "");
+                                const formattedCep = rawCep.length > 5 ? rawCep.replace(/^(\d{5})(\d{1,3})/, "$1-$2") : rawCep;
+                                setCepValue(formattedCep);
+                            }
+                        }
+                    } catch (err) {
+                        console.error("Erro ao converter GPS em endereço:", err);
+                    }
+
+                    setGpsLoading(false);
+                },
+                (error) => {
+                    console.error("Erro GPS:", error);
+                    setGpsError("Não foi possível acessar seu GPS. Verifique as permissões de localização do celular.");
+                    setGpsLoading(false);
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+            );
+        } else {
+            setGpsError("Seu navegador não suporta GPS.");
+            setGpsLoading(false);
         }
     };
 
@@ -150,9 +243,43 @@ export function AddressManager({ initialAddresses }: { initialAddresses: Address
                                     onChange={handleCepChange}
                                     placeholder="Ex: 00000-000"
                                     leftIcon={<MapPin className="h-5 w-5" />}
-                                    rightIcon={cepLoading ? <Loader2 className="h-4 w-4 animate-spin text-brand" /> : null}
+                                    rightIcon={cepLoading || geoLoading ? <Loader2 className="h-4 w-4 animate-spin text-brand" /> : null}
                                     required
                                 />
+
+                                {/* Ação: Obter localização atual do cliente */}
+                                <button
+                                    type="button"
+                                    onClick={handleGetGPS}
+                                    disabled={gpsLoading}
+                                    className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 font-bold text-xs uppercase tracking-widest active:scale-[0.98] transition-all border border-indigo-100 dark:border-indigo-900/30"
+                                >
+                                    {gpsLoading ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <Navigation2 className="h-4 w-4" />
+                                    )}
+                                    {gpsLoading ? "Buscando satélites..." : "Usar minha localização atual (GPS)"}
+                                </button>
+
+                                {gpsError && (
+                                    <div className="flex items-start gap-1 p-2 bg-red-50 dark:bg-red-950/20 rounded-lg mt-2">
+                                        <AlertTriangle className="h-3 w-3 text-red-500 mt-0.5 shrink-0" />
+                                        <p className="text-[10px] text-red-700 dark:text-red-300 font-medium">{gpsError}</p>
+                                    </div>
+                                )}
+
+                                {geoCoords && (
+                                    <div className="flex items-center gap-1.5 p-2 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg mt-2 border border-emerald-100/50">
+                                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                                        <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold tracking-wide uppercase">
+                                            Localização Exata p/ Entrega Obtida
+                                        </p>
+                                    </div>
+                                )}
+                                {/* Campos hidden com coordenadas para salvar no banco */}
+                                <input type="hidden" name="lat" value={geoCoords?.lat ?? ""} />
+                                <input type="hidden" name="lng" value={geoCoords?.lng ?? ""} />
                             </div>
 
                             <div className="grid grid-cols-4 gap-4">

@@ -1,6 +1,6 @@
 ﻿import { getActiveOrders } from "@/lib/actions/adminActions";
 import { obterConfiguracoesLoja } from "@/lib/actions/adminSettingsActions";
-import { KanbanBoard } from "@/components/domain/KanbanBoard";
+import { KanbanBoard, Order } from "@/components/domain/KanbanBoard";
 import { ChefHat } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +20,7 @@ export default async function AdminOrdersPage() {
             </div>
 
             <div className="flex-1 min-h-0">
-                <KanbanBoard initialOrders={orders as any} storeSettings={settings} />
+                <KanbanBoard initialOrders={orders as unknown as Order[]} storeSettings={settings} />
             </div>
         </div>
     );

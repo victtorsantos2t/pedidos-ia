@@ -1,5 +1,5 @@
 ﻿import { getAdminCatalog } from "@/lib/services/catalogService";
-import { MenuManager } from "@/components/domain/AdminMenuManager";
+import { MenuManager, Category, Product } from "@/components/domain/AdminMenuManager";
 import { ListIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +20,7 @@ export default async function AdminMenuPage() {
                 </div>
             </div>
 
-            <MenuManager categories={categories} products={products} />
+            <MenuManager categories={categories as unknown as Category[]} products={products as unknown as Product[]} />
         </div>
     );
 }

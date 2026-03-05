@@ -25,6 +25,7 @@ export async function createCategory(formData: FormData) {
 
     const supabase = await createClient();
     const name = formData.get("name") as string;
+    const station = formData.get("station") as string || "MAIN";
 
     // Busca o maior sort_order atual para adicionar ao final
     const { data: maxOrderData } = await supabase
@@ -38,7 +39,7 @@ export async function createCategory(formData: FormData) {
 
     const { error } = await supabase
         .from("categories")
-        .insert({ name, sort_order: nextOrder, is_active: true });
+        .insert({ name, station, sort_order: nextOrder, is_active: true });
 
     if (error) return { error: error.message };
 
@@ -47,14 +48,14 @@ export async function createCategory(formData: FormData) {
     return { success: true };
 }
 
-export async function updateCategory(categoryId: string, newName: string) {
+export async function updateCategory(categoryId: string, newName: string, station: string = "MAIN") {
     const isAdmin = await checkAdmin();
     if (!isAdmin) return { error: "Sem permissão." };
 
     const supabase = await createClient();
     const { error } = await supabase
         .from("categories")
-        .update({ name: newName })
+        .update({ name: newName, station })
         .eq("id", categoryId);
 
     if (error) return { error: error.message };
@@ -70,11 +71,12 @@ export async function deleteCategory(categoryId: string) {
 
     const supabase = await createClient();
 
-    // Verifica se há produtos vinculados
+    // Verifica se há produtos vinculados (não excluídos)
     const { data: linkedProducts } = await supabase
         .from("products")
         .select("id")
-        .eq("category_id", categoryId);
+        .eq("category_id", categoryId)
+        .is("deleted_at", null);
 
     if (linkedProducts && linkedProducts.length > 0) {
         return { error: `Não é possível excluir. Existem ${linkedProducts.length} produto(s) vinculado(s) a esta categoria.` };
@@ -82,7 +84,7 @@ export async function deleteCategory(categoryId: string) {
 
     const { error } = await supabase
         .from("categories")
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq("id", categoryId);
 
     if (error) return { error: error.message };

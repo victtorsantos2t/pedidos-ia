@@ -146,7 +146,7 @@ export function UserRatingsView({ avaliadas, pendentes, userProfile }: UserRatin
                                             {/* Content */}
                                             {rating.comment && (
                                                 <p className="text-sm text-[#2A2A2A] dark:text-gray-100 font-bold italic leading-relaxed mb-6">
-                                                    "{rating.comment}"
+                                                    &quot;{rating.comment}&quot;
                                                 </p>
                                             )}
 
@@ -177,7 +177,7 @@ export function UserRatingsView({ avaliadas, pendentes, userProfile }: UserRatin
                                                         <span className="text-[9px] font-black uppercase text-[#FA0000] tracking-widest italic">Resposta do restaurante</span>
                                                     </div>
                                                     <p className="text-xs text-gray-600 dark:text-gray-400 font-bold italic leading-relaxed">
-                                                        "{rating.store_response}"
+                                                        &quot;{rating.store_response}&quot;
                                                     </p>
                                                 </motion.div>
                                             )}

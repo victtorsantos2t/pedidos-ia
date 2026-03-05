@@ -31,7 +31,7 @@ export default async function AdminLayout({
     const settings = await obterConfiguracoesLoja();
 
     return (
-        <AdminRealtimeProvider initialOrders={orders as any} storeSettings={settings}>
+        <AdminRealtimeProvider initialOrders={orders as unknown[]} storeSettings={settings}>
             <div className="flex min-h-screen bg-gray-50/50 dark:bg-background overflow-hidden">
                 <AdminSidebar />
                 <main className="flex-1 overflow-x-hidden overflow-y-auto h-screen relative no-scrollbar">

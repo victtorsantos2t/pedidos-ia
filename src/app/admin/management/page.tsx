@@ -1,5 +1,6 @@
 ﻿import { getManagementOrders } from "@/lib/actions/adminActions";
 import { AdminOrdersManagement } from "@/components/domain/AdminOrdersManagement";
+import { Order } from "@/components/domain/KanbanBoard";
 import { ShoppingBag } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +40,7 @@ export default async function AdminManagementPage() {
             </header>
 
             <div className="flex-1">
-                <AdminOrdersManagement initialOrders={orders as any} />
+                <AdminOrdersManagement initialOrders={orders as unknown as Order[]} />
             </div>
         </div>
     );

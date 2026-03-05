@@ -1,0 +1,54 @@
+[
+  {
+    "id": "67b5e318-4532-4cde-ad4f-36c2a2bacd14",
+    "nome": "Zona Estendida",
+    "raio_min_km": 7,
+    "raio_max_km": 12,
+    "taxa_base": 5,
+    "valor_km_extra": 3.5,
+    "pedido_minimo": 30,
+    "frete_gratis_acima": 250,
+    "ativo": true,
+    "created_at": "2026-03-03T11:49:31.608964+00:00",
+    "updated_at": "2026-03-03T11:49:31.608964+00:00"
+  },
+  {
+    "id": "b4df8a87-be6b-47a4-81c4-1f45e38d7844",
+    "nome": "Zona Urbana 2",
+    "raio_min_km": 3.5,
+    "raio_max_km": 7,
+    "taxa_base": 5,
+    "valor_km_extra": 2,
+    "pedido_minimo": 25,
+    "frete_gratis_acima": 150,
+    "ativo": true,
+    "created_at": "2026-03-03T11:49:31.608964+00:00",
+    "updated_at": "2026-03-03T11:49:31.608964+00:00"
+  },
+  {
+    "id": "eea5eacb-a5f1-499e-8305-b82a3e2a4300",
+    "nome": "Zona Urbana 1",
+    "raio_min_km": 1.5,
+    "raio_max_km": 3.5,
+    "taxa_base": 5,
+    "valor_km_extra": 1.5,
+    "pedido_minimo": 20,
+    "frete_gratis_acima": 100,
+    "ativo": true,
+    "created_at": "2026-03-03T11:49:31.608964+00:00",
+    "updated_at": "2026-03-03T11:49:31.608964+00:00"
+  },
+  {
+    "id": "5900a876-ed3f-49b0-a178-0e96526b6f5b",
+    "nome": "Zona Local (Grátis)",
+    "raio_min_km": 0,
+    "raio_max_km": 1.5,
+    "taxa_base": 5,
+    "valor_km_extra": 0,
+    "pedido_minimo": 15,
+    "frete_gratis_acima": 0,
+    "ativo": true,
+    "created_at": "2026-03-03T11:49:31.608964+00:00",
+    "updated_at": "2026-03-03T11:49:31.608964+00:00"
+  }
+]

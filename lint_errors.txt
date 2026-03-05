@@ -1,0 +1,370 @@
+D:\Meu sistemas\Restaurante\rdos-app\src\app\admin\layout.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\app\admin\management\page.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\app\admin\orders\page.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\app\api\delivery\route.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\core\Textarea.tsx - An interface declaring no members is equivalent to its supertype.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminMenuManager.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminMenuManager.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminMenuManager.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminMenuManager.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminMenuManager.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminMenuManager.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminMenuManager.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminMenuManager.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminMenuManager.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminMenuManager.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminMenuManager.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminMetrics.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminOrdersManagement.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminOrdersManagement.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminOrdersManagement.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminOrdersManagement.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminOrdersManagement.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminOrdersManagement.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminOrdersManagement.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRatingsManager.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRatingsManager.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRatingsManager.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRatingsManager.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRatingsManager.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRealtimeProvider.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRealtimeProvider.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRealtimeProvider.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRealtimeProvider.tsx - Error: Cannot access variable before it is declared
+
+`tryPlayAudio` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRealtimeProvider.tsx:49:25
+  47 |                     // Dispara som caso cheguem novos pedidos via polling (fallback sonoro)
+  48 |                     if (updatedOrders.length > prevOrdersCount.current) {
+> 49 |                         tryPlayAudio();
+     |                         ^^^^^^^^^^^^ `tryPlayAudio` accessed before it is declared
+  50 |                     }
+  51 |                     prevOrdersCount.current = updatedOrders.length;
+  52 |                 }
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRealtimeProvider.tsx:74:5
+  72 |     }, [initialOrders, storeSettings, setOrders, setSettings, subscribe, unsubscribe, refreshDelays]);
+  73 |
+> 74 |     const tryPlayAudio = () => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 75 |         playBeep();
+     | ^^^^^^^^^^^^^^^^^^^
+> 76 |     };
+     | ^^^^^^^ `tryPlayAudio` is declared here
+  77 |
+  78 |     // Efeito para som de alerta de atraso (Urgent Orders)
+  79 |     useEffect(() => {
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRecentRatings.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRecentRatings.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRecentRatings.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRecentRatings.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminRecentRatings.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminSidebar.tsx - React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminSidebar.tsx - React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminSidebar.tsx - React Hook "useOrdersStore" is called conditionally. React Hooks must be called in the exact same order in every component render.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminSidebar.tsx - React Hook "useOrdersStore" is called conditionally. React Hooks must be called in the exact same order in every component render.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\AdminSidebar.tsx - React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CatalogView.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CatalogView.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CheckoutView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CheckoutView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CheckoutView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CheckoutView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CheckoutView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CheckoutView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CheckoutView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CheckoutView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CheckoutView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CheckoutView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CheckoutView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\CheckoutView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\FloatingCart.tsx - Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\FloatingCart.tsx:16:9
+  14 |
+  15 |     useEffect(() => {
+> 16 |         setMounted(true)
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  17 |     }, [])
+  18 |
+  19 |     if (!mounted || items.length === 0) return null
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\KanbanBoard.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\KanbanBoard.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\MyOrdersList.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\MyOrdersList.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\MyOrdersList.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\MyOrdersList.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\MyOrdersList.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\MyOrdersList.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx - Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx:267:26
+  265 |                         </div>
+  266 |
+> 267 |                         <RatingStars
+      |                          ^^^^^^^^^^^ This component is created during render
+  268 |                             value={deliveryRating}
+  269 |                             onChange={setDeliveryRating}
+  270 |                             label={deliveryRating === 5 ? "Incrível!" : deliveryRating === 4 ? "Muito Bom" : deliveryRating === 3 ? "Gostei" : deliveryRating === 2 ? "Regular" : deliveryRating === 1 ? "Ruim" : "Sua Nota"}
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx:108:25
+  106 |     };
+  107 |
+> 108 |     const RatingStars = ({ value, onChange, label }: { value: number, onChange: (v: number) => void, label: string }) => (
+      |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 109 |         <div className="flex flex-col items-center gap-2">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 110 |             <div className="flex gap-1.5">
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 127 |         </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 128 |     );
+      | ^^^^^^ The component is created during render here
+  129 |
+  130 |     const TagCloud = ({ tags, selectedTags, onToggle, type }: { tags: string[], selectedTags: string[], onToggle: (tag: string, type: 'product' | 'delivery') => void, type: 'product' | 'delivery' }) => (
+  131 |         <div className="flex flex-wrap justify-center gap-2 mt-4">
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx - Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx:273:26
+  271 |                         />
+  272 |
+> 273 |                         <TagCloud
+      |                          ^^^^^^^^ This component is created during render
+  274 |                             tags={DELIVERY_TAGS}
+  275 |                             selectedTags={deliveryTags}
+  276 |                             onToggle={toggleTag}
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx:130:22
+  128 |     );
+  129 |
+> 130 |     const TagCloud = ({ tags, selectedTags, onToggle, type }: { tags: string[], selectedTags: string[], onToggle: (tag: string, type: 'product' | 'delivery') => void, type: 'product' | 'delivery' }) => (
+      |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 131 |         <div className="flex flex-wrap justify-center gap-2 mt-4">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 132 |             {tags.map((tag) => (
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 146 |         </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 147 |     );
+      | ^^^^^^ The component is created during render here
+  148 |
+  149 |     if (initialRating) {
+  150 |         return (
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx - Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx:331:26
+  329 |                         </div>
+  330 |
+> 331 |                         <RatingStars
+      |                          ^^^^^^^^^^^ This component is created during render
+  332 |                             value={productRating}
+  333 |                             onChange={setProductRating}
+  334 |                             label={productRating === 5 ? "Incrível!" : productRating === 4 ? "Muito Saboroso" : productRating === 3 ? "Gostei" : productRating === 2 ? "Pode Melhorar" : productRating === 1 ? "Não Gostei" : "Sua Nota"}
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx:108:25
+  106 |     };
+  107 |
+> 108 |     const RatingStars = ({ value, onChange, label }: { value: number, onChange: (v: number) => void, label: string }) => (
+      |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 109 |         <div className="flex flex-col items-center gap-2">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 110 |             <div className="flex gap-1.5">
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 127 |         </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 128 |     );
+      | ^^^^^^ The component is created during render here
+  129 |
+  130 |     const TagCloud = ({ tags, selectedTags, onToggle, type }: { tags: string[], selectedTags: string[], onToggle: (tag: string, type: 'product' | 'delivery') => void, type: 'product' | 'delivery' }) => (
+  131 |         <div className="flex flex-wrap justify-center gap-2 mt-4">
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx - Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx:337:26
+  335 |                         />
+  336 |
+> 337 |                         <TagCloud
+      |                          ^^^^^^^^ This component is created during render
+  338 |                             tags={PRODUCT_TAGS}
+  339 |                             selectedTags={productTags}
+  340 |                             onToggle={toggleTag}
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderRatingCard.tsx:130:22
+  128 |     );
+  129 |
+> 130 |     const TagCloud = ({ tags, selectedTags, onToggle, type }: { tags: string[], selectedTags: string[], onToggle: (tag: string, type: 'product' | 'delivery') => void, type: 'product' | 'delivery' }) => (
+      |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 131 |         <div className="flex flex-wrap justify-center gap-2 mt-4">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 132 |             {tags.map((tag) => (
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 146 |         </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 147 |     );
+      | ^^^^^^ The component is created during render here
+  148 |
+  149 |     if (initialRating) {
+  150 |         return (
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderTracker.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderTracker.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderTracker.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderTracker.tsx - Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderTracker.tsx:104:13
+  102 |     useEffect(() => {
+  103 |         if (order.status === "COMPLETED" || order.status === "CANCELLED") {
+> 104 |             setRemainingTime(null);
+      |             ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  105 |             return;
+  106 |         }
+  107 |
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderTracker.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderTracker.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\OrderTracker.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\ProductDrawer.tsx - Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\ProductDrawer.tsx:34:13
+  32 |         if (product) {
+  33 |             document.body.style.overflow = "hidden";
+> 34 |             setImageError(false);
+     |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  35 |             return () => {
+  36 |                 document.body.style.overflow = "unset";
+  37 |             };
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\ProductDrawer.tsx - Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\ProductDrawer.tsx:44:13
+  42 |     useEffect(() => {
+  43 |         if (editingItem) {
+> 44 |             setQuantity(editingItem.quantity);
+     |             ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  45 |             setSelectedExtras(editingItem.extras.map(e => e.id));
+  46 |             setNotes(editingItem.notes);
+  47 |             setIsDescriptionExpanded(false);
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\RatingsView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\RatingsView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\RatingsView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\RatingsView.tsx - Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\RatingsView.tsx:26:17
+  24 |             const liked = localStorage.getItem(`rating_liked_${ratingId}`);
+  25 |             if (liked === "true") {
+> 26 |                 setIsLiked(true);
+     |                 ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  27 |                 setCount(initialLikes + 1);
+  28 |             }
+  29 |         }
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\RatingsView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\RatingsView.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\RatingsView.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\RatingsView.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\RatingsView.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\UserRatingsView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\UserRatingsView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\UserRatingsView.tsx - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\UserRatingsView.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\UserRatingsView.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\UserRatingsView.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\domain\UserRatingsView.tsx - `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.
+D:\Meu sistemas\Restaurante\rdos-app\src\components\layout\BottomNav.tsx - Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Meu sistemas\Restaurante\rdos-app\src\components\layout\BottomNav.tsx:17:9
+  15 |
+  16 |     useEffect(() => {
+> 17 |         setIsMounted(true);
+     |         ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  18 |     }, []);
+  19 |
+  20 |     const navItems = [
+D:\Meu sistemas\Restaurante\rdos-app\src\hooks\usePushNotifications.ts - Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Meu sistemas\Restaurante\rdos-app\src\hooks\usePushNotifications.ts:17:13
+  15 |     useEffect(() => {
+  16 |         if (typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window) {
+> 17 |             setIsSupported(true);
+     |             ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  18 |             setPermission(Notification.permission);
+  19 |         }
+  20 |     }, []);
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\adminActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\adminMenuActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\adminMenuActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\adminMetricsActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\adminMetricsActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\adminMetricsActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\adminMetricsActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\adminSettingsActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\adminSettingsActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\adminSettingsActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\orderRatingActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\orderRatingActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\pushActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\pushActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\pushActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\actions\pushActions.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\ordersStore.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\ordersStore.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\ordersStore.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\ordersStore.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\ordersStore.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\lib\storeUtils.ts - 'currentDayName' is never reassigned. Use 'const' instead.
+D:\Meu sistemas\Restaurante\rdos-app\src\modules\delivery\delivery.client.ts - Unexpected any. Specify a different type.
+D:\Meu sistemas\Restaurante\rdos-app\src\modules\delivery\delivery.client.ts - Unexpected any. Specify a different type.
