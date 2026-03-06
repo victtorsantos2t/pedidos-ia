@@ -45,6 +45,7 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: Order[
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("ALL");
+    const [visibleCount, setVisibleCount] = useState(20); // #2 — paginação incremental
     // Store Hooks
     const orders = useOrdersStore(s => s.orders);
     const setStoreOrders = useOrdersStore(s => s.setOrders);
@@ -93,6 +94,8 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: Order[
 
         return matchesSearch && matchesStatus;
     });
+
+    const paginatedOrders = filteredOrders.slice(0, visibleCount); // #2
 
     return (
         <div className="space-y-0">
@@ -160,7 +163,7 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: Order[
                             <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Nenhum pedido encontrado</p>
                         </div>
                     ) : (
-                        filteredOrders.map((order) => {
+                        paginatedOrders.map((order) => {
                             const config = STATUS_CONFIG[order.status] || STATUS_CONFIG.NEW;
                             const StatusIcon = config.icon;
 
@@ -197,7 +200,9 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: Order[
                                                     <span className={cn("text-sm font-black italic tracking-tighter uppercase", isDelayed ? "text-[#FA0000]" : "text-[#2A2A2A] dark:text-white")}>
                                                         #{order.id.slice(0, 8).toUpperCase()}
                                                     </span>
-                                                    <span className={cn("text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full", isDelayed ? "bg-[#FA0000] text-white" : config.color)}>
+                                                    <span className={cn("text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full flex items-center gap-1", isDelayed ? "bg-[#FA0000] text-white" : config.color)}>
+                                                        {/* #10 — ícone + cor = acessibilidade */}
+                                                        <StatusIcon className="h-3 w-3 shrink-0" />
                                                         {isDelayed ? "ATRASO CRÍTICO" : config.label}
                                                     </span>
                                                 </div>
@@ -255,6 +260,16 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: Order[
                                 </motion.div>
                             );
                         })
+                    )}
+
+                    {/* #2 — Botão Ver Mais */}
+                    {filteredOrders.length > visibleCount && (
+                        <button
+                            onClick={() => setVisibleCount(v => v + 20)}
+                            className="w-full py-4 text-xs font-bold text-gray-500 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl hover:border-[#FA0000] hover:text-[#FA0000] transition-all"
+                        >
+                            Ver mais {filteredOrders.length - visibleCount} pedidos
+                        </button>
                     )}
                 </div>
 

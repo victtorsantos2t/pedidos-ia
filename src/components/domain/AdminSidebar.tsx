@@ -17,14 +17,15 @@ import { useEffect, useState, Suspense } from "react";
 import { cn } from "@/lib/utils";
 import { UserButton } from "../core/UserButton";
 import { obterStatusLoja } from "@/lib/actions/adminSettingsActions";
+import { logout } from "@/lib/actions/authActions"; // #11 — logout real
 import { motion } from "framer-motion";
 import { useOrdersStore } from "@/lib/ordersStore";
 
 const menuItems = [
-    { name: "Painel Geral", href: "/admin", icon: LayoutDashboard },
-    { name: "Gestão (Histórico)", href: "/admin/management", icon: ShoppingBag },
-    { name: "Cozinha (Pedidos)", href: "/admin/orders", icon: ChefHat },
-    { name: "Gestão do Cardápio", href: "/admin/menu", icon: ListIcon },
+    { name: "Painel", href: "/admin", icon: LayoutDashboard },
+    { name: "Histórico", href: "/admin/management", icon: ShoppingBag },
+    { name: "Cozinha", href: "/admin/orders", icon: ChefHat },
+    { name: "Cardápio", href: "/admin/menu", icon: ListIcon },
     { name: "Configurações", href: "/admin/settings", icon: Settings },
 ];
 
@@ -150,13 +151,19 @@ function AdminSidebarContent() {
                         </div>
                     </div>
 
-                    <Link
-                        href="/"
-                        className="flex h-11 items-center gap-3 lg:justify-center xl:justify-start rounded-xl px-4 lg:px-0 xl:px-4 text-sm font-bold text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+                    {/* #11 — Logout real com confirmação */}
+                    <button
+                        onClick={async () => {
+                            if (confirm("Sair do painel admin?")) {
+                                await logout();
+                                window.location.href = "/";
+                            }
+                        }}
+                        className="flex h-11 items-center gap-3 lg:justify-center xl:justify-start rounded-xl px-4 lg:px-0 xl:px-4 text-sm font-bold text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors w-full"
                     >
-                        <LogOut className="h-5 w-5 rotate-180 shrink-0" />
-                        <span className="hidden xl:block">Sair do Painel</span>
-                    </Link>
+                        <LogOut className="h-5 w-5 shrink-0" />
+                        <span className="hidden xl:block">Sair</span>
+                    </button>
                 </div>
             </div>
         </aside>

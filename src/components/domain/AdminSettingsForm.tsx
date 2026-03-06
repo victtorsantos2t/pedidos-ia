@@ -45,6 +45,7 @@ const fmt = (v: number) =>
 export function AdminSettingsForm({ initialConfig }: AdminSettingsFormProps) {
     const [config, setConfig] = useState<StoreConfig>(initialConfig);
     const [loading, setLoading] = useState(false);
+    const [isDirty, setIsDirty] = useState(false); // #7 — controla exibição da barra de salvar
     const [activeTab, setActiveTab] = useState<TabType>("identidade");
     const [previewUrl, setPreviewUrl] = useState<string | null>(initialConfig.logo_url || null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -116,6 +117,7 @@ export function AdminSettingsForm({ initialConfig }: AdminSettingsFormProps) {
         const { name, value, type } = e.target;
         const parsed = type === "number" ? parseFloat(value) : value;
         setConfig((prev: StoreConfig) => ({ ...prev, [name]: parsed }));
+        setIsDirty(true); // #7 — marca como alterado
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,6 +152,7 @@ export function AdminSettingsForm({ initialConfig }: AdminSettingsFormProps) {
         const res = await atualizarConfiguracoesLoja(formData);
         if (res.sucesso) {
             toast.success("Configurações salvas com sucesso!");
+            setIsDirty(false); // #7 — limpa estado dirty
             setTimeout(() => window.location.reload(), 1000);
         } else {
             toast.error(res.error || "Erro ao salvar configurações.");
@@ -182,6 +185,13 @@ export function AdminSettingsForm({ initialConfig }: AdminSettingsFormProps) {
                         >
                             <tab.icon className={cn("h-4 w-4", activeTab === tab.id ? "text-[#FA0000]" : "text-gray-500 dark:text-gray-400")} />
                             {tab.label}
+                            {/* #14 — dot quando aba tem campo incompleto */}
+                            {isDirty && tab.id === "logistica" && (!config.delivery_fee || !config.min_order_value) && (
+                                <span className="ml-1 h-1.5 w-1.5 rounded-full bg-red-500 inline-block flex-shrink-0" />
+                            )}
+                            {isDirty && tab.id === "identidade" && !config.store_name && (
+                                <span className="ml-1 h-1.5 w-1.5 rounded-full bg-red-500 inline-block flex-shrink-0" />
+                            )}
                             {activeTab === tab.id && (
                                 <motion.div
                                     layoutId="admin-settings-tab-underline"
@@ -521,32 +531,31 @@ export function AdminSettingsForm({ initialConfig }: AdminSettingsFormProps) {
                 </AnimatePresence>
             </div>
 
-            {/* Barra fixa de salvamento */}
-            <div className="fixed bottom-0 left-[280px] right-0 bg-white/80 dark:bg-black/90 backdrop-blur-3xl border-t border-gray-200 dark:border-gray-800/50 py-3 px-6 flex justify-center items-center z-40">
-                <div className="max-w-4xl w-full flex items-center justify-between px-4">
-                    <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Estado de Edição</span>
+            {/* #7 — Barra de salvamento CONDICIONAL: só aparece quando há alterações */}
+            {isDirty && (
+                <div className="fixed bottom-0 left-[280px] right-0 bg-white/95 dark:bg-black/95 backdrop-blur-3xl border-t border-gray-200 dark:border-gray-800/50 py-3 px-6 flex justify-center items-center z-40">
+                    <div className="max-w-4xl w-full flex items-center justify-between px-4">
                         <div className="flex items-center gap-2">
-                            <div className="h-1.5 w-1.5 rounded-full bg-[#FA0000] animate-pulse" />
-                            <span className="text-[10px] font-black uppercase text-gray-800 dark:text-white italic">Alterações não salvas</span>
+                            <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                            <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300">Alterações não salvas</span>
                         </div>
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            className="h-10 px-8 rounded-lg bg-[#FA0000] hover:bg-red-600 text-white shadow-lg shadow-red-500/30 font-bold uppercase tracking-wide text-[11px] transition-all active:scale-95 flex items-center gap-2"
+                        >
+                            {loading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <>
+                                    <Save className="h-4 w-4" />
+                                    Salvar Configurações
+                                </>
+                            )}
+                        </Button>
                     </div>
-                    <Button
-                        type="submit"
-                        disabled={loading}
-                        className="h-10 px-8 rounded-lg bg-[#FA0000] hover:bg-red-600 text-white shadow-lg shadow-red-500/30 font-bold uppercase tracking-wide text-[11px] transition-all active:scale-95 flex items-center gap-2"
-                    >
-                        {loading ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                            <>
-                                <Save className="h-4 w-4" />
-                                Salvar Configurações
-                            </>
-                        )}
-                    </Button>
                 </div>
-            </div>
+            )}
         </form>
     );
 }

@@ -81,6 +81,11 @@ export function MenuManager({ categories, products }: { categories: Category[], 
     };
 
     const handleToggle = async (productId: string, currentValue: boolean) => {
+        // #12 — confirmação ao desativar (evita toque acidental que oculta produto)
+        if (currentValue === true) {
+            const ok = confirm("Ocultar este produto do cardápio?");
+            if (!ok) return;
+        }
         await toggleProductAvailability(productId, currentValue);
     };
 
@@ -163,6 +168,11 @@ export function MenuManager({ categories, products }: { categories: Category[], 
                 {/* Coluna 1: Categorias */}
                 <div className="space-y-6">
                     <Card className="border border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-950 rounded-xl">
+                        {/* #5 — Label de seção para separar os painéis visualmente */}
+                        <div className="flex items-center gap-2 px-6 pt-5 mb-0">
+                            <div className="h-4 w-1 bg-[#FA0000] rounded-full" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Nova Categoria</span>
+                        </div>
                         <CardHeader className="pb-4 border-b border-gray-50 dark:border-gray-900 mx-4 px-0">
                             <CardTitle className="text-xs font-black uppercase italic tracking-tighter flex items-center gap-2 text-[#2A2A2A] dark:text-white">
                                 <Plus className="h-4 w-4 text-[#FA0000]" />

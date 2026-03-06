@@ -346,3 +346,25 @@ body.drawer-open {
   width: 100%;
   touch-action: none;
 }
+
+/* ─── #6 Input Filled State (sem alterar componentes) ─── */
+/* Quando o campo tem conteúdo mas não está focado, destaca levemente */
+input:not(:placeholder-shown):not(:focus):not([type="time"]):not([type="file"]) {
+  border-color: #d1d5db !important;
+  /* gray-300 */
+  background-color: #ffffff;
+}
+
+.dark input:not(:placeholder-shown):not(:focus):not([type="time"]):not([type="file"]) {
+  border-color: #4b5563 !important;
+  /* gray-600 */
+  background-color: #030712;
+}
+
+/* ─── #8 Normalizar tracking extremo em labels secundários ─── */
+/* Limita o tracking-widest apenas quando aplicado em textos < 11px */
+.text-\[9px\].tracking-widest,
+.text-\[10px\].tracking-widest {
+  letter-spacing: 0.12em;
+  /* reduz de 0.25em para 0.12em — mais legível */
+}

@@ -39,16 +39,10 @@ export default async function AdminDashboardPage() {
                             </h1>
                         </div>
 
-                        {/* Search Bar - Elite Focus */}
-                        <div className="hidden md:flex flex-1 max-w-md relative group">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#FA0000] transition-colors">
-                                <Search className="h-4 w-4" />
-                            </div>
-                            <input
-                                type="text"
-                                placeholder="Pesquisar análises, pedidos ou produtos..."
-                                className="w-full h-11 pl-12 pr-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-transparent focus:border-[#FA0000] focus:ring-4 focus:ring-red-500/10 outline-none text-xs font-bold transition-all placeholder:text-gray-400 placeholder:italic"
-                            />
+                        {/* #13 — Busca sem função substituída por placeholder honesto */}
+                        <div className="hidden md:flex flex-1 max-w-md items-center gap-3 px-4 h-11 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-xs text-gray-400">
+                            <Search className="h-4 w-4 shrink-0" />
+                            <span className="italic">Em breve: busca global</span>
                         </div>
                     </div>
 
@@ -106,7 +100,8 @@ export default async function AdminDashboardPage() {
                                 </div>
                             </div>
                             <p className="text-gray-500 text-sm leading-snug font-medium">Painel Kanban em tempo real para gerenciar o preparo e as entregas.</p>
-                            <a href="/admin/orders" className="flex h-12 items-center justify-center rounded-[8px] bg-[#FA0000] text-white text-[11px] font-black uppercase italic tracking-widest shadow-lg shadow-red-500/20 active:scale-95 hover:bg-[#D00000] transition-all">
+                            <a href="/admin/orders" className="flex h-12 items-center justify-center rounded-[8px] bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[11px] font-bold uppercase tracking-wide active:scale-95 hover:opacity-90 transition-all">
+                                {/* #4 — vermelho reservado para urgência real */}
                                 Acessar Pedidos
                             </a>
                         </CardContent>
