@@ -32,10 +32,15 @@ export default async function AdminLayout({
 
     return (
         <AdminRealtimeProvider initialOrders={orders as unknown[]} storeSettings={settings}>
-            <div className="flex min-h-screen bg-gray-50/50 dark:bg-background overflow-hidden">
+            <div className="flex min-h-screen bg-gray-50/50 dark:bg-background" style={{ overflow: "hidden" }}>
                 <AdminSidebar />
-                <main className="flex-1 overflow-x-hidden overflow-y-auto h-screen relative no-scrollbar">
-                    {children}
+                {/* min-w-0 é crítico: impede que o flex child expanda além do flex container
+                    overflow-y-auto: permite scroll vertical no conteúdo
+                    NÃO usamos overflow-x-hidden aqui — isso cortaria botões nos cards */}
+                <main className="flex-1 min-w-0 overflow-y-auto h-screen relative">
+                    <div className="w-full">
+                        {children}
+                    </div>
                 </main>
             </div>
         </AdminRealtimeProvider>

@@ -1,14 +1,12 @@
 ﻿"use client";
 
 import { useEffect, useState } from "react";
-import { Star, MessageSquare, ArrowLeft, ChevronLeft, ChevronRight, CheckCircle, Flag, Heart } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/core/Card";
+import { Star, MessageSquare, ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
 import { obterAvaliacoesPaginadas, responderAvaliacao } from "@/lib/actions/orderRatingActions";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/core/Button";
 import { Textarea } from "@/components/core/Textarea";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -22,7 +20,7 @@ export function AdminRatingsManager() {
     const [responseValue, setResponseValue] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const pageSize = 10;
+    const pageSize = 15;
 
     async function fetchRatings() {
         setLoading(true);
@@ -30,16 +28,14 @@ export function AdminRatingsManager() {
             const { data, total } = await obterAvaliacoesPaginadas(page, pageSize);
             setRatings(data || []);
             setTotal(total || 0);
-        } catch (error) {
+        } catch {
             toast.error("Erro ao carregar avaliações.");
         } finally {
             setLoading(false);
         }
     }
 
-    useEffect(() => {
-        fetchRatings();
-    }, [page]);
+    useEffect(() => { fetchRatings(); }, [page]);
 
     const handleSendResponse = async (ratingId: string) => {
         if (!responseValue.trim()) return;
@@ -54,7 +50,7 @@ export function AdminRatingsManager() {
             } else {
                 toast.error(res.error || "Erro ao responder.");
             }
-        } catch (error) {
+        } catch {
             toast.error("Erro técnico ao enviar resposta.");
         } finally {
             setIsSubmitting(false);
@@ -64,194 +60,178 @@ export function AdminRatingsManager() {
     const totalPages = Math.ceil(total / pageSize);
 
     return (
-        <div className="space-y-10">
-            {/* Header Elite */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 px-2">
-                <div className="flex items-center gap-6">
-                    <Link
-                        href="/admin"
-                        className="h-11 w-11 flex items-center justify-center rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm text-gray-400 hover:text-[#FA0000] transition-all active:scale-95 group"
-                    >
-                        <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-                    </Link>
-                    <div>
-                        <h1 className="text-2xl font-black text-[#2A2A2A] dark:text-white tracking-tighter italic uppercase leading-none">Reputação</h1>
-                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em] mt-3 opacity-60">
-                            Central de <span className="text-[#FA0000]">Voz do Cliente</span>
-                        </p>
+        <div className="space-y-5">
+            {/* Header compacto */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-lg font-extrabold text-gray-900 dark:text-white tracking-tight">
+                        Avaliações
+                    </h1>
+                    <p className="text-xs font-medium text-gray-500 mt-0.5">
+                        {total} avaliações recebidas
+                    </p>
+                </div>
+                {totalPages > 1 && (
+                    <div className="flex items-center gap-1">
+                        <button
+                            className="h-8 w-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+                            disabled={page === 1}
+                            onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                        >
+                            <ChevronLeft className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                        </button>
+                        <span className="text-xs font-bold text-gray-700 dark:text-gray-300 tabular-nums px-2">
+                            {page} / {totalPages}
+                        </span>
+                        <button
+                            className="h-8 w-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+                            disabled={page === totalPages}
+                            onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                        >
+                            <ChevronRight className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                        </button>
                     </div>
-                </div>
-
-                <div className="bg-[#FA0000] text-white px-8 py-4 rounded-xl shadow-xl shadow-red-500/20 border border-white/10 flex items-center gap-3">
-                    <Star className="h-4 w-4 fill-white" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] italic">{total} Avaliações Totais</span>
-                </div>
+                )}
             </div>
 
-            {/* Listagem Elite */}
-            <div className="space-y-6">
+            {/* Lista de avaliações — compacta */}
+            <div className="bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800/60 overflow-hidden">
                 <AnimatePresence mode="popLayout">
                     {loading ? (
-                        [1, 2, 3].map(i => (
-                            <div key={i} className="h-48 bg-gray-50/50 dark:bg-gray-900/50 animate-pulse rounded-xl border border-gray-100 dark:border-gray-800" />
+                        [1, 2, 3, 4, 5].map(i => (
+                            <div key={i} className="h-16 animate-pulse bg-gray-50 dark:bg-gray-900/50" />
                         ))
                     ) : ratings.length === 0 ? (
-                        <div className="bg-white dark:bg-black/20 p-24 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center opacity-40 shadow-sm">
-                            <MessageSquare className="h-16 w-16 text-gray-200 mb-6" />
-                            <p className="text-sm font-black uppercase tracking-widest italic">Histórico de Feedbacks Vazio</p>
+                        <div className="py-16 flex flex-col items-center justify-center text-center">
+                            <MessageSquare className="h-8 w-8 text-gray-300 dark:text-gray-700 mb-3" />
+                            <p className="text-sm font-semibold text-gray-400">Nenhuma avaliação ainda</p>
                         </div>
                     ) : (
                         ratings.map((rating) => {
-                            const averageRating = Math.round((rating.product_rating + rating.delivery_rating) / 2);
+                            const avg = Math.round((rating.product_rating + rating.delivery_rating) / 2);
+                            const hasResponse = !!rating.store_response;
+                            const isResponding = respondingTo === rating.id;
 
                             return (
                                 <motion.div
                                     layout
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
                                     key={rating.id}
-                                    className="bg-white dark:bg-gray-950 rounded-xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm hover:border-[#FA0000]/20 transition-all duration-500 relative group overflow-hidden"
+                                    className="px-4 py-3.5 hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors"
                                 >
-                                    {/* Header: Avatar + Info */}
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-12 w-12 rounded-full bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-[#FA0000] font-black text-sm border border-gray-100 dark:border-gray-800 overflow-hidden shrink-0 shadow-inner">
-                                                {rating.profiles?.avatar_url ? (
-                                                    <img src={rating.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
-                                                ) : (
-                                                    <span className="uppercase">{rating.profiles?.name?.charAt(0) || "U"}</span>
-                                                )}
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <div className="flex items-center gap-3">
-                                                    <h4 className="text-base font-black text-[#2A2A2A] dark:text-white leading-none">
-                                                        {rating.profiles?.name || "Usuário"}
-                                                    </h4>
-                                                    <div className="flex gap-0.5">
-                                                        {[1, 2, 3, 4, 5].map((s) => (
-                                                            <Star
-                                                                key={s}
-                                                                className={cn(
-                                                                    "h-3 w-3 transition-all",
-                                                                    s <= averageRating ? "fill-[#FA0000] text-[#FA0000]" : "text-gray-100 dark:text-gray-800"
-                                                                )}
-                                                            />
-                                                        ))}
-                                                    </div>
+                                    {/* Linha principal — tudo em uma row */}
+                                    <div className="flex items-start gap-3">
+                                        {/* Avatar */}
+                                        <div className="h-9 w-9 rounded-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-[#FA0000] font-bold text-xs shrink-0 overflow-hidden">
+                                            {rating.profiles?.avatar_url ? (
+                                                <img src={rating.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
+                                            ) : (
+                                                <span className="uppercase">{rating.profiles?.name?.charAt(0) || "U"}</span>
+                                            )}
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="flex-1 min-w-0">
+                                            {/* Nome + estrelas + tempo */}
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                                    {rating.profiles?.name || "Usuário"}
+                                                </span>
+                                                <div className="flex gap-px">
+                                                    {[1, 2, 3, 4, 5].map(s => (
+                                                        <Star key={s} className={cn(
+                                                            "h-3 w-3",
+                                                            s <= avg ? "fill-amber-400 text-amber-400" : "text-gray-200 dark:text-gray-700"
+                                                        )} />
+                                                    ))}
                                                 </div>
-                                                <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-2 opacity-60">
+                                                <span className="text-[10px] font-medium text-gray-400 ml-auto shrink-0">
                                                     {formatDistanceToNow(new Date(rating.created_at), { addSuffix: true, locale: ptBR })}
                                                 </span>
                                             </div>
-                                        </div>
-                                        <div className="text-[9px] font-black text-gray-200 dark:text-gray-800 uppercase tracking-widest group-hover:text-gray-300 transition-colors">
-                                            ID #{rating.orders?.id?.substring(0, 8) || "N/A"}
-                                        </div>
-                                    </div>
 
-                                    {/* Tags Area */}
-                                    {(rating.delivery_tags?.length > 0 || rating.product_tags?.length > 0) && (
-                                        <div className="flex flex-wrap gap-2 mb-6">
-                                            {rating.delivery_tags?.map((tag: string) => (
-                                                <span key={tag} className="px-3 py-1.5 rounded-full bg-blue-50/50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase tracking-widest border border-blue-100 dark:border-blue-900/40">
-                                                    {tag}
-                                                </span>
-                                            ))}
-                                            {rating.product_tags?.map((tag: string) => (
-                                                <span key={tag} className="px-3 py-1.5 rounded-full bg-amber-50/50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest border border-amber-100 dark:border-amber-900/40">
-                                                    {tag}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
+                                            {/* Tags inline — compactas */}
+                                            {(rating.delivery_tags?.length > 0 || rating.product_tags?.length > 0) && (
+                                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                                    {rating.delivery_tags?.map((tag: string) => (
+                                                        <span key={tag} className="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 text-[9px] font-bold uppercase tracking-wide">
+                                                            {tag}
+                                                        </span>
+                                                    ))}
+                                                    {rating.product_tags?.map((tag: string) => (
+                                                        <span key={tag} className="px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 text-[9px] font-bold uppercase tracking-wide">
+                                                            {tag}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
 
-                                    {/* Content Area */}
-                                    {rating.comment && (
-                                        <div className="mb-6">
-                                            <p className="text-[#2A2A2A] dark:text-gray-200 font-medium italic leading-relaxed text-sm">
-                                                &quot;{rating.comment}&quot;
-                                            </p>
-                                        </div>
-                                    )}
+                                            {/* Comentário — uma linha */}
+                                            {rating.comment && (
+                                                <p className="text-[13px] text-gray-600 dark:text-gray-400 mt-1.5 leading-snug line-clamp-2">
+                                                    &quot;{rating.comment}&quot;
+                                                </p>
+                                            )}
 
-                                    {/* Action Footer */}
-                                    <div className="flex items-center justify-between pt-5 border-t border-gray-50 dark:border-gray-800/50">
-                                        <div className="flex items-center gap-6">
-                                            <div className="flex items-center gap-2">
-                                                <Heart className={cn(
-                                                    "h-4 w-4 transition-all",
-                                                    (rating.likes_count > 0) ? "text-[#FA0000] fill-[#FA0000]" : "text-gray-300"
-                                                )} />
-                                                <span className={cn(
-                                                    "text-[10px] font-black uppercase tracking-widest transition-colors",
-                                                    (rating.likes_count > 0) ? "text-[#FA0000]" : "text-gray-400"
-                                                )}>
-                                                    {rating.likes_count || 0} REAÇÕES
-                                                </span>
-                                            </div>
-                                        </div>
+                                            {/* Resposta da loja (se existir) */}
+                                            {hasResponse && (
+                                                <div className="mt-2 pl-3 border-l-2 border-[#FA0000]/30">
+                                                    <div className="flex items-center gap-1.5 mb-0.5">
+                                                        <CheckCircle className="h-3 w-3 text-[#FA0000]" />
+                                                        <span className="text-[10px] font-bold text-[#FA0000]">Respondido</span>
+                                                    </div>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                                                        {rating.store_response}
+                                                    </p>
+                                                </div>
+                                            )}
 
-                                        <div className="flex items-center gap-4">
-                                            {!rating.store_response && respondingTo !== rating.id && (
+                                            {/* Botão Responder */}
+                                            {!hasResponse && !isResponding && (
                                                 <button
-                                                    className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest italic text-[#FA0000] hover:translate-x-1 transition-all"
                                                     onClick={() => setRespondingTo(rating.id)}
+                                                    className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-[#FA0000] hover:underline transition-all"
                                                 >
-                                                    <MessageSquare className="h-4 w-4" />
+                                                    <MessageSquare className="h-3 w-3" />
                                                     Responder
                                                 </button>
                                             )}
-                                            <button className="text-gray-200 hover:text-[#FA0000] transition-colors">
-                                                <Flag className="h-4 w-4" />
-                                            </button>
+
+                                            {/* Form resposta inline */}
+                                            {isResponding && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, height: 0 }}
+                                                    animate={{ opacity: 1, height: "auto" }}
+                                                    className="mt-2.5 space-y-2 overflow-hidden"
+                                                >
+                                                    <Textarea
+                                                        className="h-20 text-sm bg-gray-50 dark:bg-gray-900 rounded-lg border-gray-200 dark:border-gray-800 focus:ring-[#FA0000]/20"
+                                                        placeholder="Sua resposta..."
+                                                        value={responseValue}
+                                                        onChange={(e) => setResponseValue(e.target.value)}
+                                                        autoFocus
+                                                    />
+                                                    <div className="flex justify-end gap-2">
+                                                        <Button
+                                                            variant="ghost"
+                                                            className="h-8 text-xs font-semibold text-gray-500 px-3"
+                                                            onClick={() => { setRespondingTo(null); setResponseValue(""); }}
+                                                        >
+                                                            Cancelar
+                                                        </Button>
+                                                        <Button
+                                                            className="h-8 px-4 rounded-lg bg-[#FA0000] text-white text-xs font-bold shadow-sm"
+                                                            disabled={isSubmitting || !responseValue.trim()}
+                                                            onClick={() => handleSendResponse(rating.id)}
+                                                        >
+                                                            {isSubmitting ? "Enviando..." : "Enviar"}
+                                                        </Button>
+                                                    </div>
+                                                </motion.div>
+                                            )}
                                         </div>
                                     </div>
-
-                                    {/* Response Layer */}
-                                    {rating.store_response ? (
-                                        <motion.div
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: "auto" }}
-                                            className="mt-6 p-5 rounded-xl bg-gray-50 dark:bg-black/20 border-l-2 border-[#FA0000] space-y-3"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <div className="h-5 w-5 rounded-full bg-[#FA0000]/10 flex items-center justify-center">
-                                                    <CheckCircle className="h-3.5 w-3.5 text-[#FA0000]" />
-                                                </div>
-                                                <span className="text-[10px] font-black uppercase text-[#FA0000] tracking-widest italic">Resposta da Loja</span>
-                                            </div>
-                                            <p className="text-xs text-gray-700 dark:text-gray-400 font-bold italic leading-relaxed">
-                                                &quot;{rating.store_response}&quot;
-                                            </p>
-                                        </motion.div>
-                                    ) : (
-                                        respondingTo === rating.id && (
-                                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-8 bg-gray-50 dark:bg-black/40 p-6 rounded-xl border border-gray-100 dark:border-gray-800">
-                                                <Textarea
-                                                    className="h-28 text-sm font-medium focus:ring-[#FA0000]/20 bg-white dark:bg-black rounded-xl"
-                                                    placeholder="Sua resposta cordial..."
-                                                    value={responseValue}
-                                                    onChange={(e) => setResponseValue(e.target.value)}
-                                                />
-                                                <div className="flex justify-end gap-3 mt-4">
-                                                    <Button
-                                                        variant="ghost"
-                                                        className="h-10 text-[10px] uppercase font-black"
-                                                        onClick={() => setRespondingTo(null)}
-                                                    >
-                                                        Cancelar
-                                                    </Button>
-                                                    <Button
-                                                        className="h-11 px-6 rounded-xl bg-[#FA0000] text-white text-[10px] font-black uppercase italic tracking-widest shadow-xl shadow-red-500/20"
-                                                        disabled={isSubmitting || !responseValue.trim()}
-                                                        onClick={() => handleSendResponse(rating.id)}
-                                                    >
-                                                        {isSubmitting ? "ENVIANDO..." : "PUBLICAR RESPOSTA"}
-                                                    </Button>
-                                                </div>
-                                            </motion.div>
-                                        )
-                                    )}
                                 </motion.div>
                             );
                         })
@@ -259,39 +239,25 @@ export function AdminRatingsManager() {
                 </AnimatePresence>
             </div>
 
-            {/* Pagination Controls Elite */}
+            {/* Paginação bottom — repetida para facilidade */}
             {!loading && totalPages > 1 && (
-                <div className="flex items-center justify-center gap-6 py-10">
+                <div className="flex items-center justify-center gap-1 pt-2">
                     <button
-                        className="h-16 w-16 flex items-center justify-center rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 disabled:opacity-20 shadow-sm hover:border-[#FA0000]/40 transition-all active:scale-90 group"
+                        className="h-8 w-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
                         disabled={page === 1}
-                        onClick={() => {
-                            setPage(prev => Math.max(1, prev - 1));
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
+                        onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                     >
-                        <ChevronLeft className="h-8 w-8 text-[#2A2A2A] dark:text-white group-hover:-translate-x-1 transition-transform" />
+                        <ChevronLeft className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                     </button>
-
-                    <div className="flex items-center gap-6">
-                        <div className="bg-[#FA0000] text-white h-16 w-16 rounded-xl flex items-center justify-center text-xl font-black shadow-2xl shadow-red-500/30 italic rotate-3 border-4 border-white dark:border-black">
-                            {page}
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-[8px] font-black text-gray-300 uppercase tracking-[0.5em] leading-none mb-1">Página de</span>
-                            <span className="text-sm font-black text-gray-400 uppercase tracking-widest italic">{totalPages}</span>
-                        </div>
-                    </div>
-
+                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300 tabular-nums px-3">
+                        {page} de {totalPages}
+                    </span>
                     <button
-                        className="h-16 w-16 flex items-center justify-center rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 disabled:opacity-20 shadow-sm hover:border-[#FA0000]/40 transition-all active:scale-90 group"
+                        className="h-8 w-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
                         disabled={page === totalPages}
-                        onClick={() => {
-                            setPage(prev => Math.min(totalPages, prev + 1));
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
+                        onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                     >
-                        <ChevronRight className="h-8 w-8 text-[#2A2A2A] dark:text-white group-hover:translate-x-1 transition-transform" />
+                        <ChevronRight className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                     </button>
                 </div>
             )}

@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 export default function AdminRatingsPage() {
     return (
-        <div className="p-6 lg:p-10 max-w-5xl mx-auto min-h-full">
+        <div className="p-5 lg:p-6 max-w-[1200px] mx-auto min-h-full">
             <AdminRatingsManager />
         </div>
     );

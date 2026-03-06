@@ -38,16 +38,16 @@ export default async function AdminDashboardPage() {
     }).format(now);
 
     return (
-        <div className="flex flex-col min-h-full bg-gray-50/60 dark:bg-[#080808]">
+        <div className="flex flex-col min-h-full bg-[#f8f9fb] dark:bg-[#080808]">
 
             {/* ── Top Bar ─────────────────────────────────────────── */}
-            <header className="sticky top-0 z-30 bg-white/95 dark:bg-black/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-900 px-6 py-3.5">
+            <header className="sticky top-0 z-30 bg-white dark:bg-black/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-900 px-6 py-3.5 shadow-sm shadow-gray-100/50">
                 <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-6">
 
                     {/* Saudação */}
                     <div className="min-w-fit">
-                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest leading-none capitalize">{dateStr}</p>
-                        <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight leading-tight mt-0.5">
+                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none capitalize">{dateStr}</p>
+                        <h1 className="text-base font-extrabold text-gray-900 dark:text-white tracking-tight leading-tight mt-0.5">
                             {greeting}, <span className="text-[#FA0000]">João</span>
                         </h1>
                     </div>
@@ -160,10 +160,10 @@ function SectionHeader({
 }) {
     return (
         <div className={`flex items-center gap-3 ${inline ? "" : "mb-4"}`}>
-            <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest whitespace-nowrap">
+            <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest whitespace-nowrap">
                 {label}
             </span>
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
+            <div className="flex-1 h-px bg-gray-300 dark:bg-gray-800" />
             {dot && (
                 <div className="flex items-center gap-1.5 shrink-0">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -192,16 +192,16 @@ function SmallActionCard({
     return (
         <a
             href={href}
-            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 p-5 flex items-center justify-between hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-md dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-0.5"
+            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 p-5 flex items-center justify-between hover:border-gray-400 dark:hover:border-gray-600 hover:shadow-md dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-0.5"
         >
             <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white group-hover:bg-gray-200 dark:group-hover:bg-gray-800 transition-all shrink-0">
+                <div className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white group-hover:bg-gray-200 dark:group-hover:bg-gray-800 transition-all shrink-0">
                     {icon}
                 </div>
                 <div>
-                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest leading-none mb-0.5">{label}</p>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none mb-0.5">{label}</p>
                     <p className="text-sm font-bold text-gray-900 dark:text-white">{title}</p>
-                    <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{description}</p>
+                    <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-0.5">{description}</p>
                 </div>
             </div>
             <ArrowRight className="h-4 w-4 text-gray-300 dark:text-gray-700 group-hover:text-gray-500 dark:group-hover:text-gray-400 group-hover:translate-x-0.5 transition-all shrink-0" />

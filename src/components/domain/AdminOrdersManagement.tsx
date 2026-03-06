@@ -1,6 +1,8 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import type { Order } from "@/components/domain/KanbanBoard";
+import { createClient } from "@/lib/supabase/client";
 import {
     Search,
     Filter,
@@ -26,10 +28,6 @@ import { Card } from "@/components/core/Card";
 import { cn } from "@/lib/utils";
 import { updateOrderStatus } from "@/lib/actions/adminActions";
 import { Button } from "../core/Button";
-import { useOrdersStore } from "@/lib/ordersStore";
-import { parseEstimatedTime } from "@/lib/storeUtils";
-import { useEffect } from "react";
-import type { Order } from "@/components/domain/KanbanBoard";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
     NEW: { label: "Novo", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400", icon: ShoppingBag },
@@ -45,30 +43,39 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: Order[
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("ALL");
-    const [visibleCount, setVisibleCount] = useState(20); // #2 — paginação incremental
-    // Store Hooks
-    const orders = useOrdersStore(s => s.orders);
-    const setStoreOrders = useOrdersStore(s => s.setOrders);
-    const refreshDelays = useOrdersStore(s => s.refreshDelays);
-    const subscribeStore = useOrdersStore(s => s.subscribe);
-    const unsubscribeStore = useOrdersStore(s => s.unsubscribe);
-    const updateOrder = useOrdersStore(s => s.updateOrder);
+    const [visibleCount, setVisibleCount] = useState(20);
+    // Estado local — NÃO usa ordersStore (que é a fila ativa do Kanban)
+    const [orders, setOrders] = useState<Order[]>(initialOrders);
+    const channelRef = useRef<any>(null);
 
     useEffect(() => {
-        setStoreOrders(initialOrders);
-        refreshDelays();
-        subscribeStore();
+        setOrders(initialOrders);
+    }, [initialOrders]);
 
-        const interval = setInterval(() => {
-            setCurrentTime(new Date());
-            refreshDelays();
-        }, 30000);
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 30000);
+        return () => clearInterval(timer);
+    }, []);
+
+    // Realtime próprio — atualiza apenas o estado local, sem tocar no Kanban
+    useEffect(() => {
+        const supabase = createClient();
+        channelRef.current = supabase
+            .channel("management-orders")
+            .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders" }, (payload) => {
+                const updated = payload.new as Order;
+                setOrders(prev =>
+                    prev.some(o => o.id === updated.id)
+                        ? prev.map(o => o.id === updated.id ? { ...o, ...updated } : o)
+                        : prev
+                );
+            })
+            .subscribe();
 
         return () => {
-            clearInterval(interval);
-            unsubscribeStore();
+            if (channelRef.current) supabase.removeChannel(channelRef.current);
         };
-    }, [initialOrders, setStoreOrders, refreshDelays, subscribeStore, unsubscribeStore]);
+    }, []);
 
     // Estados do Cancelamento
     const [cancelStep, setCancelStep] = useState<"IDLE" | "CONFIRM" | "REASON">("IDLE");
@@ -169,7 +176,7 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: Order[
 
                             const createdAt = new Date(order.created_at).getTime();
                             const elapsedMin = Math.floor((currentTime.getTime() - createdAt) / 60000);
-                            const maxMin = useOrdersStore.getState().maxEstimatedTime;
+                            const maxMin = 45; // tempo estimado padrão
                             const isDelayed = elapsedMin > (maxMin + 5) && (order.status === "NEW" || order.status === "PREPARING");
                             const remainingMin = maxMin - elapsedMin;
 
@@ -245,7 +252,6 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: Order[
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         updateOrderStatus(order.id, "PREPARING");
-                                                        refreshDelays();
                                                     }}
                                                 >
                                                     <ChefHat className="h-4 w-4" /> PRIORIZAR
@@ -521,8 +527,12 @@ export function AdminOrdersManagement({ initialOrders }: { initialOrders: Order[
                                                     if (res.error) {
                                                         alert(res.error);
                                                     } else {
-                                                        // Atualiza o estado global
-                                                        updateOrder({ id: selectedOrder!.id, status: "CANCELLED" });
+                                                        // Atualiza o estado local
+                                                        setOrders(prev => prev.map(o =>
+                                                            o.id === selectedOrder!.id
+                                                                ? { ...o, status: "CANCELLED" as any }
+                                                                : o
+                                                        ));
                                                         setSelectedOrder({ ...selectedOrder!, status: "CANCELLED", cancel_reason: finalReason });
                                                         setCancelStep("IDLE");
                                                         setCancelReason("");

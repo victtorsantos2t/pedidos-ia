@@ -490,8 +490,8 @@ export function MenuManager({ categories, products }: { categories: Category[], 
                                                     </div>
 
                                                     {/* Details Context */}
-                                                    <div className="px-3 pb-3 sm:py-0 sm:pl-0 sm:pr-6 flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                                        <div className="flex-1 min-w-0 py-1 sm:py-3">
+                                                    <div className="px-3 pb-3 sm:py-0 sm:pl-0 sm:pr-4 flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0">
+                                                        <div className="flex-1 min-w-0 py-1 sm:py-3 overflow-hidden">
                                                             <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                                                                 <h4 className="text-[13px] font-black text-[#2A2A2A] dark:text-white uppercase tracking-tighter truncate italic leading-tight">{p.name}</h4>
                                                                 <div className="flex items-center gap-1.5 shrink-0">
@@ -504,10 +504,10 @@ export function MenuManager({ categories, products }: { categories: Category[], 
                                                         </div>
 
                                                         {/* Price & Actions Row */}
-                                                        <div className="flex items-center justify-between sm:justify-end gap-5 sm:gap-6 py-3 sm:py-0 border-t sm:border-0 border-gray-50 dark:border-gray-900/50">
-                                                            <div className="flex flex-col sm:items-end">
-                                                                <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5 opacity-60 italic whitespace-nowrap">Valor Sugerido</span>
-                                                                <span className="text-lg font-black text-[#2A2A2A] dark:text-[#FA0000] italic tracking-tighter leading-none">
+                                                        <div className="flex items-center justify-between sm:justify-end gap-3 py-2 sm:py-0 border-t sm:border-0 border-gray-50 dark:border-gray-900/50 shrink-0">
+                                                            <div className="flex flex-col sm:items-end shrink-0">
+                                                                <span className="text-[8px] font-semibold text-gray-400 uppercase tracking-wider leading-none mb-0.5 opacity-60 whitespace-nowrap">Valor</span>
+                                                                <span className="text-base font-black text-[#2A2A2A] dark:text-[#FA0000] tracking-tight leading-none whitespace-nowrap">
                                                                     R$ {Number(p.price).toFixed(2)}
                                                                 </span>
                                                             </div>
@@ -524,19 +524,20 @@ export function MenuManager({ categories, products }: { categories: Category[], 
                                                                         }
                                                                     }}
                                                                     className={cn(
-                                                                        "h-9 px-4 flex items-center gap-2 rounded-xl border transition-all font-black text-[9px] uppercase tracking-widest italic active:scale-95",
-                                                                        isEditingThis ? "bg-[#2A2A2A] text-white border-transparent" : "bg-transparent text-gray-500 border-gray-200 hover:border-[#FA0000] hover:text-[#FA0000] dark:border-gray-700 dark:text-gray-400 dark:hover:text-[#FA0000]"
+                                                                        "h-9 px-3 flex items-center gap-1.5 rounded-xl border transition-all font-semibold text-[10px] uppercase tracking-wide active:scale-95 whitespace-nowrap",
+                                                                        isEditingThis ? "bg-gray-900 text-white border-transparent" : "bg-white text-gray-500 border-gray-200 hover:border-[#FA0000] hover:text-[#FA0000] dark:bg-gray-950 dark:border-gray-700 dark:text-gray-400 dark:hover:text-[#FA0000]"
                                                                     )}
                                                                 >
-                                                                    {isEditingThis ? <Check className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
-                                                                    <span>{isEditingThis ? "Pronto" : "Editar"}</span>
+                                                                    {isEditingThis ? <Check className="h-3.5 w-3.5 shrink-0" /> : <Pencil className="h-3.5 w-3.5 shrink-0" />}
+                                                                    <span className="hidden sm:inline">{isEditingThis ? "Pronto" : "Editar"}</span>
+                                                                    <span className="sm:hidden">{isEditingThis ? "OK" : "Ed."}</span>
                                                                 </button>
 
                                                                 <button
                                                                     onClick={() => setExpandedProduct(isExpanded ? null : p.id)}
                                                                     className={cn(
-                                                                        "h-9 w-9 flex items-center justify-center rounded-xl transition-all border active:scale-95",
-                                                                        isExpanded ? "bg-gray-100 border-gray-200 text-[#2A2A2A]" : "bg-gray-50 border-gray-100 text-gray-400 hover:bg-gray-100 hover:text-[#FA0000]"
+                                                                        "h-9 w-9 flex items-center justify-center rounded-xl transition-all border active:scale-95 shrink-0",
+                                                                        isExpanded ? "bg-gray-100 border-gray-200 text-gray-700 dark:bg-gray-900 dark:border-gray-700 dark:text-white" : "bg-white border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-[#FA0000] dark:bg-gray-950 dark:border-gray-700"
                                                                     )}
                                                                 >
                                                                     {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
