@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { isStoreOpen } from "@/lib/storeUtils";
+import { resolveRatingName, resolveRatingInitial } from "@/lib/ratingHelpers";
 
 interface RatingsViewProps {
     ratings: any[];
@@ -276,37 +277,37 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                     const averageRating = Math.round((rating.product_rating + rating.delivery_rating) / 2);
 
                                     return (
-                                        <section key={rating.id} className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800/50 hover:border-[#FA0000]/20 transition-all duration-300">
+                                        <section key={rating.id} className="bg-white dark:bg-gray-900 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-800/50 hover:border-[#FA0000]/20 transition-all duration-300">
                                             {/* Header do Card */}
-                                            <div className="flex items-start justify-between mb-4">
+                                            <div className="flex items-start justify-between mb-3">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="h-10 w-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center border border-gray-100 dark:border-gray-700 overflow-hidden shrink-0">
+                                                    <div className="h-9 w-9 rounded-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center overflow-hidden shrink-0">
                                                         {rating.profiles?.avatar_url ? (
                                                             <img src={rating.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
                                                         ) : (
-                                                            <span className="text-sm font-bold text-gray-600 dark:text-gray-400 uppercase">
-                                                                {rating.profiles?.name?.charAt(0) || "U"}
+                                                            <span className="text-xs font-bold text-[#FA0000] uppercase">
+                                                                {resolveRatingInitial(rating)}
                                                             </span>
                                                         )}
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center gap-2">
                                                             <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-none">
-                                                                {rating.profiles?.name || "Cliente Satisfeito"}
+                                                                {resolveRatingName(rating)}
                                                             </h4>
-                                                            <div className="flex gap-0.5">
+                                                            <div className="flex gap-px">
                                                                 {[1, 2, 3, 4, 5].map((s) => (
                                                                     <Star
                                                                         key={s}
                                                                         className={cn(
-                                                                            "h-2.5 w-2.5 transition-all text-[#FA0000]",
-                                                                            s <= averageRating ? "fill-[#FA0000]" : "text-gray-100 dark:text-gray-800 fill-transparent"
+                                                                            "h-3 w-3",
+                                                                            s <= averageRating ? "fill-amber-400 text-amber-400" : "text-gray-200 dark:text-gray-700"
                                                                         )}
                                                                     />
                                                                 ))}
                                                             </div>
                                                         </div>
-                                                        <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold mt-1 uppercase tracking-widest">
+                                                        <p className="text-[10px] font-medium text-gray-400 mt-1">
                                                             {formatDistanceToNow(new Date(rating.created_at), { addSuffix: true, locale: ptBR })}
                                                         </p>
                                                     </div>
@@ -315,7 +316,7 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
 
                                             {/* Comentário */}
                                             {rating.comment && (
-                                                <p className="text-[14px] text-gray-700 dark:text-gray-300 font-bold italic leading-relaxed mb-4">
+                                                <p className="text-[13px] text-gray-600 dark:text-gray-400 leading-snug mb-3">
                                                     &quot;{rating.comment}&quot;
                                                 </p>
                                             )}
@@ -335,12 +336,12 @@ export function RatingsView({ ratings, stats, config }: RatingsViewProps) {
                                             {rating.store_response && (
                                                 <div className="mt-4 p-4 rounded-xl bg-gray-50 dark:bg-black/20 border-l-2 border-[#FA0000] space-y-2">
                                                     <div className="flex items-center gap-2">
-                                                        <div className="h-5 w-5 rounded-full bg-[#FA0000]/10 flex items-center justify-center">
+                                                        <div className="h-4 w-4 rounded-full bg-[#FA0000]/10 flex items-center justify-center">
                                                             <CheckCircle2 className="h-3 w-3 text-[#FA0000]" />
                                                         </div>
-                                                        <span className="text-[9px] font-black uppercase text-[#FA0000] tracking-widest italic">Resposta do Restaurante</span>
+                                                        <span className="text-[10px] font-bold text-[#FA0000]">Resposta do Restaurante</span>
                                                     </div>
-                                                    <p className="text-xs text-gray-700 dark:text-gray-300 font-bold italic leading-relaxed">
+                                                    <p className="text-[13px] text-gray-600 dark:text-gray-400 leading-snug">
                                                         &quot;{rating.store_response}&quot;
                                                     </p>
                                                 </div>

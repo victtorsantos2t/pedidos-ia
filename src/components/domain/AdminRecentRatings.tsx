@@ -14,6 +14,7 @@ import {
 } from "@/lib/actions/orderRatingActions";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { resolveRatingName, resolveRatingInitial } from "@/lib/ratingHelpers";
 import { toast } from "sonner";
 
 export function AdminRecentRatings() {
@@ -86,8 +87,9 @@ export function AdminRecentRatings() {
             <div className="divide-y divide-gray-50 dark:divide-gray-900">
                 {ratings.map((rating) => {
                     const avg = Math.round((rating.product_rating + rating.delivery_rating) / 2);
-                    const initial = rating.profiles?.name?.charAt(0) || "U";
-                    const tags = [...(rating.delivery_tags || []), ...(rating.product_tags || [])].slice(0, 2);
+                    const clientName = resolveRatingName(rating);
+                    const initial = resolveRatingInitial(rating);
+                    const tags = [...(rating.delivery_tags || []), ...(rating.product_tags || [])].slice(0, 3);
 
                     return (
                         <motion.div
@@ -98,31 +100,36 @@ export function AdminRecentRatings() {
                         >
                             <div className="flex items-start gap-4">
                                 {/* Avatar */}
-                                <div className="h-9 w-9 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[#FA0000] font-black text-xs overflow-hidden shrink-0 border border-gray-200 dark:border-gray-700">
+                                <div className="h-9 w-9 rounded-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-[#FA0000] font-bold text-xs overflow-hidden shrink-0">
                                     {rating.profiles?.avatar_url
                                         ? <img src={rating.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
-                                        : <span>{initial}</span>}
+                                        : <span className="uppercase">{initial}</span>}
                                 </div>
 
                                 {/* Conteúdo */}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-2 mb-1">
-                                        <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                                            {rating.profiles?.name || "Usuário"}
+                                        <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                            {clientName}
                                         </span>
                                         {/* Estrelas */}
-                                        <div className="flex gap-0.5 shrink-0">
+                                        <div className="flex gap-px shrink-0">
                                             {[1, 2, 3, 4, 5].map(s => (
-                                                <Star key={s} className={`h-3 w-3 ${s <= avg ? "fill-[#FA0000] text-[#FA0000]" : "text-gray-200 dark:text-gray-700"}`} />
+                                                <Star key={s} className={cn("h-3 w-3", s <= avg ? "fill-amber-400 text-amber-400" : "text-gray-200 dark:text-gray-700")} />
                                             ))}
                                         </div>
                                     </div>
 
                                     {/* Tags compactas */}
                                     {tags.length > 0 && (
-                                        <div className="flex gap-1.5 mb-1.5">
-                                            {tags.map((tag: string) => (
-                                                <span key={tag} className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">
+                                        <div className="flex flex-wrap gap-1 mb-1.5">
+                                            {tags.map((tag: string, i: number) => (
+                                                <span key={tag} className={cn(
+                                                    "px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide",
+                                                    i < (rating.delivery_tags?.length || 0)
+                                                        ? "bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400"
+                                                        : "bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400"
+                                                )}>
                                                     {tag}
                                                 </span>
                                             ))}
@@ -131,7 +138,7 @@ export function AdminRecentRatings() {
 
                                     {/* Comment */}
                                     {rating.comment && (
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 italic leading-relaxed line-clamp-1">
+                                        <p className="text-[13px] text-gray-600 dark:text-gray-400 leading-snug line-clamp-1">
                                             &quot;{rating.comment}&quot;
                                         </p>
                                     )}

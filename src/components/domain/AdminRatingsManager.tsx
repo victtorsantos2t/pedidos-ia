@@ -9,6 +9,7 @@ import { Button } from "@/components/core/Button";
 import { Textarea } from "@/components/core/Textarea";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { resolveRatingName, resolveRatingInitial } from "@/lib/ratingHelpers";
 import { toast } from "sonner";
 
 export function AdminRatingsManager() {
@@ -127,7 +128,7 @@ export function AdminRatingsManager() {
                                             {rating.profiles?.avatar_url ? (
                                                 <img src={rating.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
                                             ) : (
-                                                <span className="uppercase">{rating.profiles?.name?.charAt(0) || "U"}</span>
+                                                <span className="uppercase">{resolveRatingInitial(rating)}</span>
                                             )}
                                         </div>
 
@@ -136,7 +137,7 @@ export function AdminRatingsManager() {
                                             {/* Nome + estrelas + tempo */}
                                             <div className="flex items-center gap-2 flex-wrap">
                                                 <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                                    {rating.profiles?.name || "Usuário"}
+                                                    {resolveRatingName(rating)}
                                                 </span>
                                                 <div className="flex gap-px">
                                                     {[1, 2, 3, 4, 5].map(s => (

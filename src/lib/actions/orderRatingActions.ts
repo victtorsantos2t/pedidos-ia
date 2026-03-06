@@ -121,8 +121,8 @@ export async function obterRecentesAvaliacoes(limit = 10) {
         .from("order_ratings")
         .select(`
             *,
-            profiles:user_id (name),
-            orders:order_id (id)
+            profiles:user_id (name, avatar_url),
+            orders:order_id (id, customer_name)
         `)
         .order("created_at", { ascending: false })
         .limit(limit);
@@ -140,8 +140,8 @@ export async function obterAvaliacoesPaginadas(page: number, pageSize: number = 
         .from("order_ratings")
         .select(`
             *,
-            profiles:user_id (name),
-            orders:order_id (id)
+            profiles:user_id (name, avatar_url),
+            orders:order_id (id, customer_name)
         `, { count: "exact" })
         .order("created_at", { ascending: false })
         .range(from, to);
