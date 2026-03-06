@@ -111,26 +111,26 @@ function AdminSidebarContent() {
                                 target={item.name.includes("Cozinha") ? "_blank" : undefined}
                                 onClick={() => setIsOpen(false)}
                                 className={cn(
-                                    "relative flex h-[52px] items-center gap-4 mx-4 xl:mx-4 lg:mx-2 px-5 lg:px-0 xl:px-5 lg:justify-center xl:justify-start rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 group",
+                                    "relative flex h-11 items-center gap-3.5 mx-3 xl:mx-3 lg:mx-2 px-3.5 lg:px-0 xl:px-3.5 lg:justify-center xl:justify-start rounded-xl text-[12px] font-semibold transition-all duration-200 group overflow-hidden",
                                     isActive
-                                        ? "text-white bg-[#FA0000] shadow-xl shadow-red-500/20 italic"
-                                        : "text-gray-500 hover:text-[#FA0000] hover:bg-red-50/50 dark:hover:bg-red-950/10 italic"
+                                        ? "text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-900"
+                                        : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900/60"
                                 )}
                             >
-                                <item.icon className={cn(
-                                    "h-5 w-5 transition-all duration-300 shrink-0",
-                                    isActive ? "text-white" : "text-gray-400 group-hover:text-[#FA0000] group-hover:scale-110"
-                                )} />
-                                <span className="tracking-tight hidden xl:block">{item.name}</span>
+                                {/* Indicator ativo: barra vertical esquerda */}
+                                {isActive && (
+                                    <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-[#FA0000]" />
+                                )}
 
-                                {/* Badge de Urgência (Apenas para Cozinha) */}
+                                <item.icon className={cn(
+                                    "h-4.5 w-4.5 transition-all duration-200 shrink-0",
+                                    isActive ? "text-[#FA0000]" : "text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300"
+                                )} />
+                                <span className="font-semibold tracking-normal hidden xl:block">{item.name}</span>
+
+                                {/* Badge de Urgência */}
                                 {item.name.includes("Cozinha") && delayedCount > 0 && (
-                                    <div className={cn(
-                                        "absolute right-4 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black shadow-lg animate-pulse border-2",
-                                        isActive
-                                            ? "bg-white text-[#FA0000] border-[#FA0000]"
-                                            : "bg-[#FA0000] text-white border-white dark:border-black shadow-red-500/40"
-                                    )}>
+                                    <div className="absolute right-3 h-4.5 min-w-4.5 px-1 flex items-center justify-center rounded-full bg-[#FA0000] text-white text-[9px] font-black shadow-md shadow-red-500/30 animate-pulse">
                                         {delayedCount}
                                     </div>
                                 )}
@@ -139,15 +139,15 @@ function AdminSidebarContent() {
                     })}
                 </div>
 
-                <div className="p-4 xl:p-6 lg:p-2 border-t border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/10">
-                    <div className="flex items-center gap-4 lg:gap-0 xl:gap-4 mb-6 lg:justify-center xl:justify-start">
+                <div className="p-4 xl:p-5 lg:p-2 border-t border-gray-100 dark:border-gray-800">
+                    <div className="flex items-center gap-3 lg:gap-0 xl:gap-3 mb-4 lg:justify-center xl:justify-start">
                         <div className="relative shrink-0">
                             <UserButton />
-                            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-white dark:border-black" />
+                            <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-white dark:border-black" />
                         </div>
                         <div className="hidden xl:flex flex-col min-w-0">
-                            <p className="text-sm font-black text-[#2A2A2A] dark:text-white truncate">Admin Session</p>
-                            <span className="text-[10px] font-black text-[#FA0000] uppercase tracking-widest leading-none">Status: Online</span>
+                            <p className="text-sm font-bold text-gray-900 dark:text-white truncate">Admin Session</p>
+                            <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 leading-none">Online</span>
                         </div>
                     </div>
 
