@@ -3,15 +3,14 @@ import { AdminRecentRatings } from "@/components/domain/AdminRecentRatings";
 import { KitchenActionCard } from "@/components/domain/KitchenActionCard";
 import { AdminInsights } from "@/components/domain/AdminInsights";
 import {
-    Bell, Search, ListIcon, ShoppingBag,
-    Settings, ArrowRight, Star
+    ListIcon, ShoppingBag,
+    ArrowRight
 } from "lucide-react";
 import { obterConfiguracoesLoja } from "@/lib/actions/adminSettingsActions";
 import { isStoreOpen as checkStoreOpen } from "@/lib/storeUtils";
 import { getActiveOrders } from "@/lib/actions/adminActions";
 import { getDashboardMetrics } from "@/lib/actions/adminMetricsActions";
 import { StatusToggle } from "@/components/domain/StatusToggle";
-import { UserButton } from "@/components/core/UserButton";
 
 export const dynamic = "force-dynamic";
 
@@ -52,28 +51,10 @@ export default async function AdminDashboardPage() {
                         </h1>
                     </div>
 
-                    {/* Search placeholder */}
-                    <div className="hidden md:flex flex-1 max-w-xs items-center gap-2.5 px-4 h-9 rounded-xl bg-gray-100 dark:bg-gray-900 border border-transparent text-xs text-gray-400 cursor-not-allowed select-none">
-                        <Search className="h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate">Em breve: busca global</span>
-                    </div>
-
                     {/* Controles direita */}
-                    <div className="flex items-center gap-4">
-                        <div className="flex flex-col items-end gap-1">
-                            <span className="text-[9px] font-semibold text-gray-400 uppercase tracking-widest leading-none">Loja</span>
-                            <StatusToggle isStoreOpen={isStoreOpen} />
-                        </div>
-                        <div className="h-8 w-px bg-gray-100 dark:bg-gray-800" />
-                        <div className="flex items-center gap-2">
-                            <button className="relative h-9 w-9 rounded-xl bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-all">
-                                <Bell className="h-4 w-4" />
-                                <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-[#FA0000] border border-white dark:border-black" />
-                            </button>
-                            <div className="h-9 w-9 rounded-xl bg-gray-100 dark:bg-gray-900 flex items-center justify-center overflow-hidden hover:ring-2 ring-gray-300 dark:ring-gray-700 transition-all">
-                                <UserButton />
-                            </div>
-                        </div>
+                    <div className="flex items-center gap-3">
+                        <span className="text-[9px] font-semibold text-gray-400 uppercase tracking-widest leading-none hidden sm:block">Loja</span>
+                        <StatusToggle isStoreOpen={isStoreOpen} />
                     </div>
                 </div>
             </header>

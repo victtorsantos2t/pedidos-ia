@@ -533,7 +533,7 @@ export function AdminSettingsForm({ initialConfig }: AdminSettingsFormProps) {
 
             {/* #7 — Barra de salvamento CONDICIONAL: só aparece quando há alterações */}
             {isDirty && (
-                <div className="fixed bottom-0 left-[280px] right-0 bg-white/95 dark:bg-black/95 backdrop-blur-3xl border-t border-gray-200 dark:border-gray-800/50 py-3 px-6 flex justify-center items-center z-40">
+                <div className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-black/95 backdrop-blur-3xl border-t border-gray-200 dark:border-gray-800/50 py-3 px-6 flex justify-center items-center z-50">
                     <div className="max-w-4xl w-full flex items-center justify-between px-4">
                         <div className="flex items-center gap-2">
                             <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
@@ -549,7 +549,7 @@ export function AdminSettingsForm({ initialConfig }: AdminSettingsFormProps) {
                             ) : (
                                 <>
                                     <Save className="h-4 w-4" />
-                                    Salvar Configurações
+                                    Salvar
                                 </>
                             )}
                         </Button>
